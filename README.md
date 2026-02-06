@@ -1,6 +1,6 @@
 # Planning
 
-A list-oriented GTK ideation and daily planner. Works offline and can backs up/pull from a NAS when needed.
+A list-oriented GTK ideation and daily planner. Works offline and can back up/pull from a NAS when needed.
 
 ## Vision
 
