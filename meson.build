@@ -13,8 +13,8 @@ gtkmm_dep = dependency('gtkmm-4.0') # c++ bindings for gtk
 sources = files(
   './src/services/backup.cpp',
   './src/main.cpp',
-  './src/planListView.cpp',
-  './src/plans.cpp',
+  './src/planList.cpp',
+  './src/planPage.cpp',
 )
 
 executable(

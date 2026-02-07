@@ -19,13 +19,7 @@ class App: public Gtk::Application {
     );
     g_object_unref(provider);
 
-
-    auto planList = createPlanList();
-
-    planList.listBox->append(*planItem("Math"));
-    planList.listBox->append(*planItem("General"));
-    planList.listBox->append(*planItem("Hack Club"));
-    window->set_child(*planList.scrolled);
+    window->set_child(*planList());
 
     window->present();
   };
