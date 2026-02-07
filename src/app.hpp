@@ -2,6 +2,11 @@
 #include <gtkmm.h>
 #include <functional>
 
+struct PlanList {
+    Gtk::ScrolledWindow* scrolled;
+    Gtk::Box* listBox;
+};
+
 class PlansListView: public Gtk::Box {
 public:
     PlansListView();
@@ -9,4 +14,5 @@ public:
     std::function<void(const std::string&)> on_plan_selected;
 };
 
-Gtk::ScrolledWindow* planList();
+PlanList createPlanList();
+Gtk::Button* planItem(const Glib::ustring& title_text);

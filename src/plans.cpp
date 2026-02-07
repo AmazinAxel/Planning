@@ -1,8 +1,9 @@
 #include <gtkmm.h>
+#include "app.hpp"
 
-Gtk::ScrolledWindow* planList() {
-    auto box = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::VERTICAL);
-    box->set_margin(6);
+PlanList createPlanList() {
+    auto listBox = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::VERTICAL);
+    listBox->set_spacing(6);
 
     auto header = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::HORIZONTAL);
     header->set_hexpand(true);
@@ -12,16 +13,23 @@ Gtk::ScrolledWindow* planList() {
 
     auto plus_button = Gtk::make_managed<Gtk::Button>("+");
     plus_button->set_halign(Gtk::Align::END);
-    plus_button->set_valign(Gtk::Align::START);
 
     header->append(*spacer);
     header->append(*plus_button);
 
-    box->append(*header);
+    listBox->append(*header);
 
+    // Scrolled window
     auto scrolled = Gtk::make_managed<Gtk::ScrolledWindow>();
     scrolled->set_policy(Gtk::PolicyType::AUTOMATIC, Gtk::PolicyType::AUTOMATIC);
-    scrolled->set_child(*box);
+    scrolled->set_child(*listBox);
 
-    return scrolled;
+    return { scrolled, listBox };
+};
+
+Gtk::Button* planItem(const Glib::ustring& planNameText) {
+    auto planItem = Gtk::make_managed<Gtk::Button>(planNameText);
+    planItem->add_css_class("planName");
+    planItem->set_margin(6);
+    return planItem;
 }
