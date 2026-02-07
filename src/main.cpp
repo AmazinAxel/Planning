@@ -1,22 +1,21 @@
-#include <gtk/gtk.h>
+#include <gtkmm.h>
+#include "app.hpp"
 
-static void
-activate (GtkApplication *app, gpointer user_data) {
-  GtkWidget *window;
+class App: public Gtk::Application {
+  void on_activate() override {
+    auto window = new Gtk::ApplicationWindow();
+    add_window(*window);
 
-  window = gtk_application_window_new(app);
-  gtk_window_set_title(GTK_WINDOW (window), "Planning");
-  gtk_window_present(GTK_WINDOW (window));
+    window->set_title("Planning");
+    window->set_child(*planList());
+    window->present();
+  };
+
+  public:
+    App(): Gtk::Application("com.amazinaxel.planning") {}
 };
 
-int main (int argc, char **argv) {
-  GtkApplication *app;
-  int status;
-
-  app = gtk_application_new("com.amazinaxel.planning", G_APPLICATION_DEFAULT_FLAGS);
-  g_signal_connect(app, "activate", G_CALLBACK(activate), NULL);
-  status = g_application_run(G_APPLICATION(app), argc, argv);
-  g_object_unref(app);
-
-  return status;
+int main(int argc, char** argv) {
+  auto app = Glib::make_refptr_for_instance<App>(new App());
+  return app->run(argc, argv);
 };
