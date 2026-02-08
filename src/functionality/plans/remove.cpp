@@ -9,6 +9,5 @@ void deletePlanFromJSON(json& data, const std::string& name) {
             return p["name"].get<std::string>() == name;
         }
     );
-
     arr.erase(it, arr.end());
 };

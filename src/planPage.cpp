@@ -43,8 +43,7 @@ Gtk::Box* planPage(Gtk::Stack* stack, json& appData, const Glib::ustring& planNa
             stack->set_visible_child("list"); // Go back
             deletePlanFromJSON(appData, planName);
             saveJSON(appData);
-            //updatePlanList(listBox, appData, onSelect);
-
+            App::get()->listPage->refresh();
             return true;
         };
 
