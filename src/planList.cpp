@@ -45,7 +45,7 @@ Gtk::Box* planListPage(json& appData, std::function<void(const Glib::ustring&)> 
     header->append(*makePlanButton( // Create new plan butto
         [listBox, &appData, onSelect](const std::string& name) {
             addPlanToJSON(appData, name);
-            save_json(appData);
+            saveJSON(appData);
             updatePlanList(listBox, appData, onSelect);
         }
     ));

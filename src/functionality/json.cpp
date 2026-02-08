@@ -23,7 +23,7 @@ json initLoadJSON() {
     return json::parse(contents);
 };
 
-void save_json(const json& json) {
+void saveJSON(const json& json) {
     auto path = Glib::get_user_config_dir() + "/planning/data.json";
     Glib::file_set_contents(path, json.dump(4));
 };

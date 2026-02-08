@@ -9,7 +9,6 @@ using json = nlohmann::json;
 
 class App: public Gtk::Application {
     Gtk::Stack* stack = nullptr;
-    PlanPage* planPageWidget = nullptr;
     json appData;
 
     void on_activate() override {
@@ -34,25 +33,24 @@ class App: public Gtk::Application {
         stack = Gtk::make_managed<Gtk::Stack>();
         stack->set_transition_type(Gtk::StackTransitionType::SLIDE_LEFT_RIGHT);
 
-        planPageWidget = Gtk::make_managed<PlanPage>(stack);
 
         auto listPage = planListPage(appData, [this](const Glib::ustring& name) {
             openPlan(name);
         });
 
         stack->add(*listPage, "list", "List");
-        stack->add(*planPageWidget, "plan", "Plan");
 
         stack->set_visible_child("list"); // inital page
         window->set_child(*stack);
         window->present();
     };
 
-    void openPlan(const Glib::ustring& name) {
-        if (planPageWidget) {
-            planPageWidget->setPlanName(name);
-            stack->set_visible_child("plan");
+    void openPlan(const Glib::ustring& planName) {
+        if (auto lastStack = stack->get_child_by_name("plan")) {
+            stack->remove(*lastStack); // Remove previous stack
         };
+        stack->add(*planPage(stack, appData, planName), "plan", "Plan");
+        stack->set_visible_child("plan");
     };
 };
 

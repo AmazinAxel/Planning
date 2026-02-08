@@ -6,11 +6,6 @@
 using json = nlohmann::json;
 
 Gtk::Box* planListPage(json& appData, std::function<void(const Glib::ustring&)> onSelect);
+void updatePlanList(Gtk::Box* listBox, json& appData, std::function<void(const Glib::ustring&)> onSelect);
 
-class PlanPage: public Gtk::Box {
-    public:
-        PlanPage(Gtk::Stack* stack);
-        void setPlanName(const Glib::ustring& name);
-    private:
-        Gtk::Label* titleLabel = nullptr;
-};
+Gtk::Box* planPage(Gtk::Stack* stack, json& appData, const Glib::ustring& planName);

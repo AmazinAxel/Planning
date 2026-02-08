@@ -1,7 +1,12 @@
 #include "app.hpp"
 #include "functionality/plans/plans.hpp"
+#include "functionality/utils.hpp"
 
-PlanPage::PlanPage(Gtk::Stack* stack): Gtk::Box(Gtk::Orientation::VERTICAL) {
+#include <nlohmann/json.hpp>
+using json = nlohmann::json;
+
+Gtk::Box* planPage(Gtk::Stack* stack, json& appData, const Glib::ustring& planName) {
+    auto planPage = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::VERTICAL);
     // Header
     auto header = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::HORIZONTAL);
 
@@ -13,7 +18,7 @@ PlanPage::PlanPage(Gtk::Stack* stack): Gtk::Box(Gtk::Orientation::VERTICAL) {
     // Go back
     backBtn->signal_clicked().connect([stack]() { stack->set_visible_child("list"); }); 
 
-    titleLabel = Gtk::make_managed<Gtk::Label>("Plan");
+    auto titleLabel = Gtk::make_managed<Gtk::Label>(planName);
     titleLabel->set_halign(Gtk::Align::END);
     titleLabel->add_css_class("headerText");
     titleLabel->set_hexpand(true);
@@ -21,12 +26,12 @@ PlanPage::PlanPage(Gtk::Stack* stack): Gtk::Box(Gtk::Orientation::VERTICAL) {
     header->append(*backBtn);
     header->append(*titleLabel);
 
-    append(*header);
+    planPage->append(*header);
 
     // Escape and plan page deletion
     auto key = Gtk::EventControllerKey::create();
-    add_controller(key);
-    key->signal_key_pressed().connect([stack](guint keyval, guint keycode, Gdk::ModifierType state) {
+    planPage->add_controller(key);
+    key->signal_key_pressed().connect([stack, planName, &appData](guint keyval, guint keycode, Gdk::ModifierType state) {
         if (keyval == GDK_KEY_Escape) {
             stack->set_visible_child("list"); // Go back
             return true;
@@ -36,13 +41,17 @@ PlanPage::PlanPage(Gtk::Stack* stack): Gtk::Box(Gtk::Orientation::VERTICAL) {
         bool ctrl = static_cast<bool>(state & Gdk::ModifierType::CONTROL_MASK); // is holding control
         if (ctrl && keyval == GDK_KEY_d) {
             stack->set_visible_child("list"); // Go back
-            deletePlanFromJSON();
+            deletePlanFromJSON(appData, planName);
+            saveJSON(appData);
+            //updatePlanList(listBox, appData, onSelect);
+
             return true;
         };
 
         return false;
     }, false);
 
-
     // APPEND(*) STUFF HERE
+
+    return planPage;
 };
