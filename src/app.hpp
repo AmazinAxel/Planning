@@ -2,8 +2,15 @@
 #include <gtkmm.h>
 #include <functional>
 
-Gtk::Box* planList(std::function<void(const Glib::ustring&)> onSelect);
+#include <nlohmann/json.hpp>
+using json = nlohmann::json;
 
-Gtk::Button* planItem(const Glib::ustring& name, std::function<void(const Glib::ustring&)> onSelect);
+Gtk::Box* planListPage(json& appData, std::function<void(const Glib::ustring&)> onSelect);
 
-class PlanPage : public Gtk::Box { public: PlanPage(std::function<void()> onBack); void setPlanName(const Glib::ustring& name); private: Gtk::Label* titleLabel = nullptr; };
+class PlanPage: public Gtk::Box {
+    public:
+        PlanPage(std::function<void()> onBack);
+        void setPlanName(const Glib::ustring& name);
+    private:
+        Gtk::Label* titleLabel = nullptr;
+};

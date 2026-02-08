@@ -1,8 +1,35 @@
 #include "app.hpp"
 #include "functionality/plans/plans.hpp"
+#include "functionality/utils.hpp"
 
-Gtk::Box* planList(std::function<void(const Glib::ustring&)> onSelect) {
+#include <nlohmann/json.hpp>
+using json = nlohmann::json;
+
+Gtk::Button* planItem(const Glib::ustring& name, std::function<void(const Glib::ustring&)> onSelect) {
+    auto btn = Gtk::make_managed<Gtk::Button>(name);
+    btn->add_css_class("planName");
+
+    btn->signal_clicked().connect([name, onSelect]() {
+        onSelect(name);
+    });
+
+    return btn;
+};
+
+void updatePlanList(Gtk::Box* listBox, json& appData, std::function<void(const Glib::ustring&)> onSelect) {
+    while (auto child = listBox->get_first_child())
+        listBox->remove(*child); // Remove previous plans
+
+    // Add all plans 
+    for (auto& plan : appData["plans"]) {
+        Glib::ustring name = plan["name"].get<std::string>();
+        listBox->append(*planItem(name, onSelect));
+    };
+};
+
+Gtk::Box* planListPage(json& appData, std::function<void(const Glib::ustring&)> onSelect) {
     auto planListParent = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::VERTICAL);
+    auto listBox = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::VERTICAL);
 
     // Header
     auto header = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::HORIZONTAL);
@@ -15,34 +42,24 @@ Gtk::Box* planList(std::function<void(const Glib::ustring&)> onSelect) {
     title->set_hexpand(true);
 
     header->append(*title);
-    header->append(*makeListButton());
-
+    header->append(*makePlanButton( // Create new plan butto
+        [listBox, &appData, onSelect](const std::string& name) {
+            addPlanToJSON(appData, name);
+            save_json(appData);
+            updatePlanList(listBox, appData, onSelect);
+        }
+    ));
     planListParent->append(*header);
 
-    // demo items TODO replace with dynamic
-    auto planList = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::VERTICAL);
-    planList->set_spacing(10);
-    planList->set_vexpand(true);
+    // Plan items
+    listBox->set_spacing(10);
+    listBox->set_vexpand(true);
 
-    planList->append(*planItem("Math", onSelect));
-    planList->append(*planItem("General", onSelect));
-    planList->append(*planItem("Hack Club", onSelect));
+    updatePlanList(listBox, appData, onSelect);
 
-    // Scrollable
-    auto scrollable = Gtk::make_managed<Gtk::ScrolledWindow>();
-    scrollable->set_child(*planList);
-    planListParent->append(*scrollable);
+    auto scroll = Gtk::make_managed<Gtk::ScrolledWindow>();
+    scroll->set_child(*listBox);
+    planListParent->append(*scroll);
 
     return planListParent;
-};
-
-Gtk::Button* planItem(const Glib::ustring& name, std::function<void(const Glib::ustring&)> onSelect) {
-    auto btn = Gtk::make_managed<Gtk::Button>(name);
-    btn->add_css_class("planName");
-
-    btn->signal_clicked().connect([name, onSelect]() {
-        onSelect(name);
-    });
-
-    return btn;
 };

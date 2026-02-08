@@ -2,15 +2,22 @@
 #include <gtkmm/applicationwindow.h>
 #include <gtkmm/stack.h>
 #include "app.hpp"
+#include "functionality/utils.hpp"
+
+#include <nlohmann/json.hpp>
+using json = nlohmann::json;
 
 class App: public Gtk::Application {
     Gtk::Stack* stack = nullptr;
     PlanPage* planPageWidget = nullptr;
+    json appData;
 
     void on_activate() override {
         auto window = new Gtk::ApplicationWindow();
         add_window(*window);
         window->set_title("Planning");
+
+        appData = initLoadJSON();
 
         // CSS
         GtkCssProvider *provider = gtk_css_provider_new();
@@ -31,7 +38,7 @@ class App: public Gtk::Application {
             [this]() { goBack(); }
         );
 
-        auto listPage = planList([this](const Glib::ustring& name) {
+        auto listPage = planListPage(appData, [this](const Glib::ustring& name) {
             openPlan(name);
         });
 
