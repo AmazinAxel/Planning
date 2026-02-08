@@ -23,9 +23,11 @@
 	--blue3: #5e81ac;
 }
 
-/* App header */
+/* App */
 
-.appHeader { padding: 1rem; }
+window { padding: 1rem; }
+
+.appHeader {  }
 
 label.headerText {
   font-size: 2rem;
@@ -38,4 +40,7 @@ label.headerText {
 button.planName {
   font-size: 2rem;
   font-family: 'Sora';
-};
+}
+
+/* No annoying button outlines */
+* { outline-width: 0px; outline: none; }

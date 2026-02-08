@@ -1,45 +1,48 @@
-#include <gtkmm.h>
 #include "app.hpp"
 
-Gtk::ScrolledWindow* planList() {
-    auto listBox = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::VERTICAL);
-    listBox->set_spacing(6);
+Gtk::ScrolledWindow* planList(std::function<void(const Glib::ustring&)> onSelect) {
+    auto box = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::VERTICAL);
+    box->set_spacing(10);
 
+    // Header
     auto header = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::HORIZONTAL);
     header->add_css_class("appHeader");
     header->set_hexpand(true);
 
-    auto headerText = Gtk::make_managed<Gtk::Label>("Planning");
-    headerText->set_hexpand(true);
-    headerText->set_halign(Gtk::Align::START); // Left align
-    headerText->add_css_class("headerText");
+    auto title = Gtk::make_managed<Gtk::Label>("Planning");
+    title->set_halign(Gtk::Align::START);
+    title->add_css_class("headerText");
+    title->set_hexpand(true);
 
-    // Add list button
-    auto addListButton = Gtk::make_managed<Gtk::Button>();
-    addListButton->set_halign(Gtk::Align::END);
-    auto addListIcon = Gtk::make_managed<Gtk::Image>();
-    addListIcon->set_from_icon_name("list-add-symbolic");
-    addListButton->set_child(*addListIcon);
+    auto addBtn = Gtk::make_managed<Gtk::Button>();
+    auto icon = Gtk::make_managed<Gtk::Image>();
+    icon->set_from_icon_name("list-add-symbolic");
+    addBtn->set_child(*icon);
 
-    header->append(*headerText);
-    header->append(*addListButton);
+    header->append(*title);
+    header->append(*addBtn);
 
-    listBox->append(*header);
-    listBox->append(*planItem("Math"));
-    listBox->append(*planItem("General"));
-    listBox->append(*planItem("Hack Club"));
+    box->append(*header);
 
-    // Scrolled window
-    auto scrolled = Gtk::make_managed<Gtk::ScrolledWindow>();
-    scrolled->set_policy(Gtk::PolicyType::AUTOMATIC, Gtk::PolicyType::AUTOMATIC);
-    scrolled->set_child(*listBox);
+    // demo items TODO replace with dynamic
+    box->append(*planItem("Math", onSelect));
+    box->append(*planItem("General", onSelect));
+    box->append(*planItem("Hack Club", onSelect));
 
-    return scrolled;
+    // Scrollable
+    auto scrollable = Gtk::make_managed<Gtk::ScrolledWindow>();
+    scrollable->set_child(*box);
+
+    return scrollable;
 };
 
-Gtk::Button* planItem(const Glib::ustring& planNameText) {
-    auto planItem = Gtk::make_managed<Gtk::Button>(planNameText);
-    planItem->add_css_class("planName");
-    planItem->set_margin(6);
-    return planItem;
-}
+static Gtk::Button* planItem(const Glib::ustring& name, std::function<void(const Glib::ustring&)> onSelect) {
+    auto btn = Gtk::make_managed<Gtk::Button>(name);
+    btn->add_css_class("planName");
+
+    btn->signal_clicked().connect([name, onSelect]() {
+        onSelect(name);
+    });
+
+    return btn;
+};

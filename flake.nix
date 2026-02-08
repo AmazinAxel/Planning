@@ -8,8 +8,7 @@
     in {
       devShells.${system}.default = pkgs.mkShell {
         buildInputs = with pkgs; [
-        gtk4
-        gtkmm4
+        gtkmm4 # C++ gtk
         gcc
         pkg-config
         meson

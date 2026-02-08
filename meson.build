@@ -5,8 +5,7 @@ project(
   default_options: [ 'cpp_std=c++17' ]
 )
 
-gtk4_dep = dependency('gtk4')
-gtkmm_dep = dependency('gtkmm-4.0') # c++ bindings for gtk
+gtkmm_dep = dependency('gtkmm-4.0') # c++ for gtk
 
 #server = get_option('server')
 
@@ -20,7 +19,7 @@ sources = files(
 executable(
   'planning',
   sources,
-  dependencies: [ gtk4_dep, gtkmm_dep ],
+  dependencies: [ gtkmm_dep ],
   cpp_args: [
     '-O2',
     #'-DSERVER="' + server + '"'
