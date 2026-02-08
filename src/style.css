@@ -43,4 +43,4 @@ button.planName {
 }
 
 /* No annoying button outlines */
-* { outline-width: 0px; outline: none; }
+button { outline-width: 0px; outline: none; }
