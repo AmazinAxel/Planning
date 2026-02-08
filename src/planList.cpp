@@ -1,8 +1,8 @@
 #include "app.hpp"
+#include "functionality/plans/plans.hpp"
 
-Gtk::ScrolledWindow* planList(std::function<void(const Glib::ustring&)> onSelect) {
-    auto box = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::VERTICAL);
-    box->set_spacing(10);
+Gtk::Box* planList(std::function<void(const Glib::ustring&)> onSelect) {
+    auto planListParent = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::VERTICAL);
 
     // Header
     auto header = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::HORIZONTAL);
@@ -14,29 +14,29 @@ Gtk::ScrolledWindow* planList(std::function<void(const Glib::ustring&)> onSelect
     title->add_css_class("headerText");
     title->set_hexpand(true);
 
-    auto addBtn = Gtk::make_managed<Gtk::Button>();
-    auto icon = Gtk::make_managed<Gtk::Image>();
-    icon->set_from_icon_name("list-add-symbolic");
-    addBtn->set_child(*icon);
-
     header->append(*title);
-    header->append(*addBtn);
+    header->append(*makeListButton());
 
-    box->append(*header);
+    planListParent->append(*header);
 
     // demo items TODO replace with dynamic
-    box->append(*planItem("Math", onSelect));
-    box->append(*planItem("General", onSelect));
-    box->append(*planItem("Hack Club", onSelect));
+    auto planList = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::VERTICAL);
+    planList->set_spacing(10);
+    planList->set_vexpand(true);
+
+    planList->append(*planItem("Math", onSelect));
+    planList->append(*planItem("General", onSelect));
+    planList->append(*planItem("Hack Club", onSelect));
 
     // Scrollable
     auto scrollable = Gtk::make_managed<Gtk::ScrolledWindow>();
-    scrollable->set_child(*box);
+    scrollable->set_child(*planList);
+    planListParent->append(*scrollable);
 
-    return scrollable;
+    return planListParent;
 };
 
-static Gtk::Button* planItem(const Glib::ustring& name, std::function<void(const Glib::ustring&)> onSelect) {
+Gtk::Button* planItem(const Glib::ustring& name, std::function<void(const Glib::ustring&)> onSelect) {
     auto btn = Gtk::make_managed<Gtk::Button>(name);
     btn->add_css_class("planName");
 

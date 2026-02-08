@@ -10,7 +10,10 @@ gtkmm_dep = dependency('gtkmm-4.0') # c++ for gtk
 #server = get_option('server')
 
 sources = files(
-  './src/services/backup.cpp',
+  './src/functionality/lists/make.cpp',
+  './src/functionality/lists/remove.cpp',
+  './src/functionality/plans/make.cpp',
+  './src/functionality/plans/remove.cpp',
   './src/main.cpp',
   './src/planList.cpp',
   './src/planPage.cpp',
