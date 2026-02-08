@@ -34,9 +34,7 @@ class App: public Gtk::Application {
         stack = Gtk::make_managed<Gtk::Stack>();
         stack->set_transition_type(Gtk::StackTransitionType::SLIDE_LEFT_RIGHT);
 
-        planPageWidget = Gtk::make_managed<PlanPage>(
-            [this]() { goBack(); }
-        );
+        planPageWidget = Gtk::make_managed<PlanPage>(stack);
 
         auto listPage = planListPage(appData, [this](const Glib::ustring& name) {
             openPlan(name);
@@ -56,8 +54,6 @@ class App: public Gtk::Application {
             stack->set_visible_child("plan");
         };
     };
-
-    void goBack() { if (stack) stack->set_visible_child("list"); };
 };
 
 int main(int argc, char** argv) {

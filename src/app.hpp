@@ -9,7 +9,7 @@ Gtk::Box* planListPage(json& appData, std::function<void(const Glib::ustring&)> 
 
 class PlanPage: public Gtk::Box {
     public:
-        PlanPage(std::function<void()> onBack);
+        PlanPage(Gtk::Stack* stack);
         void setPlanName(const Glib::ustring& name);
     private:
         Gtk::Label* titleLabel = nullptr;

@@ -11,3 +11,7 @@ Milanote and Trello are the two primary competitors for tracking and planning yo
 Enter the Nix devshell: `nix develop` (run your IDE here if you want intellisense)
 
 Setup: `meson setup build` and build: `meson compile -C build && ./build/planning`
+
+## Tip
+
+Planning is keyboard focused. Use your arrow keys and press escape to go back. Press `control + d` to delete a plan.
