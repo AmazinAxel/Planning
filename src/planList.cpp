@@ -26,7 +26,7 @@ PlanListPage::PlanListPage(json& data): Gtk::Box(Gtk::Orientation::VERTICAL), ap
     append(*scroll);
 
     // Add all plans 
-    for (auto& plan : appData["plans"])     refresh();
+    refresh();
 };
 
 void PlanListPage::addPlan(const std::string& name) {

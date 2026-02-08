@@ -7,24 +7,30 @@ using json = nlohmann::json;
 
 Gtk::Box* planPage(Gtk::Stack* stack, json& appData, const Glib::ustring& planName) {
     auto planPage = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::VERTICAL);
-    // Header
     auto header = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::HORIZONTAL);
 
+    // Go back button
     auto backBtn = Gtk::make_managed<Gtk::Button>();
     auto backIcon = Gtk::make_managed<Gtk::Image>();
     backIcon->set_from_icon_name("go-previous-symbolic");
     backBtn->set_child(*backIcon);
+    backBtn->signal_clicked().connect([stack]() { stack->set_visible_child("list"); });
 
-    // Go back
-    backBtn->signal_clicked().connect([stack]() { stack->set_visible_child("list"); }); 
+    // Plan name
+    auto planNameLabel = Gtk::make_managed<Gtk::Label>(planName);
+    planNameLabel->add_css_class("headerText");
+    planNameLabel->set_hexpand(true);
 
-    auto titleLabel = Gtk::make_managed<Gtk::Label>(planName);
-    titleLabel->set_halign(Gtk::Align::END);
-    titleLabel->add_css_class("headerText");
-    titleLabel->set_hexpand(true);
+    // Add list button
+    auto addListBtn = Gtk::make_managed<Gtk::Button>();
+    auto addIcon = Gtk::make_managed<Gtk::Image>();
+    addIcon->set_from_icon_name("list-add-symbolic");
+    addListBtn->set_child(*addIcon);
+    addListBtn->signal_clicked().connect([stack]() { stack->set_visible_child("list"); });
 
     header->append(*backBtn);
-    header->append(*titleLabel);
+    header->append(*planNameLabel);
+    header->append(*addListBtn);
 
     planPage->append(*header);
 
