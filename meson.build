@@ -11,10 +11,8 @@ giomm = dependency('giomm-2.68') # Gio
 #server = get_option('server')
 
 sources = files(
-  './src/functionality/lists/make.cpp',
-  './src/functionality/lists/remove.cpp',
-  './src/functionality/plans/make.cpp',
-  './src/functionality/plans/remove.cpp',
+  './src/functionality/lists/lists.cpp',
+  './src/functionality/plans/plans.cpp',
   './src/functionality/json.cpp',
   './src/main.cpp',
   './src/planList.cpp',
