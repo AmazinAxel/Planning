@@ -16,7 +16,7 @@ void App::on_activate() {
     add_window(*window);
     window->set_title("Planning");
 
-    downloadDataFromServer();
+    isSynced = downloadDataFromServer();
     appData = initLoadJSON();
 
     // CSS

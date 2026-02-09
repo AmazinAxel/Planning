@@ -3,5 +3,5 @@ using json = nlohmann::json;
 
 json initLoadJSON();
 void saveJSON(const json& json);
-void downloadDataFromServer();
+bool downloadDataFromServer();
 void uploadDataToServer();

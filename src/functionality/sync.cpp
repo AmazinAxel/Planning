@@ -15,12 +15,12 @@ static bool getSyncConfig(json& config) {
 
     std::string contents = Glib::file_get_contents(data_path);
     config = json::parse(contents, nullptr, false);
-    return !config.contains("smbserver");
+    return config.contains("smbserver");
 };
 
-void downloadDataFromServer() {
+bool downloadDataFromServer() {
     json config;
-    if (!getSyncConfig(config)) return;
+    if (!getSyncConfig(config)) return false;
 
     std::string server = config["smbserver"];
     std::string user     = config.value("user", "");
@@ -41,11 +41,15 @@ void downloadDataFromServer() {
         std::string out, err;
         int status;
         Glib::spawn_sync("", argv, Glib::SpawnFlags::SEARCH_PATH, {}, &out, &err, &status);
-        if (status != 0)
+        if (status != 0) {
             std::cerr << "Download from server failed: " << err << std::endl;
+            return false;
+        };
     } catch (const Glib::Error& err) {
         std::cerr << "Download from server error: " << err.what() << std::endl;
+        return false;
     };
+    return true;
 };
 
 void uploadDataToServer() {
@@ -75,5 +79,5 @@ void uploadDataToServer() {
             std::cerr << "Upload to server failed: " << err << std::endl;
     } catch (const Glib::Error& err) {
         std::cerr << "Upload to server error: " << err.what() << std::endl;
-    }
-}
+    };
+};

@@ -20,6 +20,7 @@ public:
     static App* instance;
     PlanListPage* listPage = nullptr;
     Gtk::Stack* stack = nullptr;
+    bool isSynced;
     json appData;
     std::string focusedList;
     void openPlan(const Glib::ustring& name, const std::string& focusedList = "");

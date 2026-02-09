@@ -9,14 +9,14 @@ Milanote and Trello are the two primary competitors for tracking and planning yo
 ## Sync with a Samba server
 
 This app can upload or download its data from any Samba share.
-Add these options to `~/.config/planning/data.json`:
+Make sure you have samba running and add these options to `~/.config/planning/data.json`:
 
 ```json
 "smbserver": "alechomelab.local",
 "user": "alec",
-"group": "workgroup",
+"group": "WORKGROUP",
 "password": "",
-"smbshare": "USB"
+"smbshare": "USB",
 ```
 
 ## Build

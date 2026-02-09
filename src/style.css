@@ -42,5 +42,7 @@ button.planName {
   font-family: 'Sora';
 }
 
+label.isSynced { color: var(--darkest4); }
+
 /* No annoying button outlines */
 button { outline-width: 0px; outline: none; }

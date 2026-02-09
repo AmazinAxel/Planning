@@ -25,6 +25,12 @@ PlanListPage::PlanListPage(json& data): Gtk::Box(Gtk::Orientation::VERTICAL), ap
     scroll->set_child(*listBox);
     append(*scroll);
 
+    // Sync status
+    auto syncLabel = Gtk::make_managed<Gtk::Label>(App::get()->isSynced ? "Synced" : "Not synced");
+    syncLabel->set_halign(Gtk::Align::START);
+    syncLabel->add_css_class("isSynced");
+    append(*syncLabel);
+
     // Add all plans
     refresh();
 };
