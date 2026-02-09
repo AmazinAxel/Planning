@@ -14,6 +14,7 @@ sources = files(
   './src/functionality/lists/lists.cpp',
   './src/functionality/plans/plans.cpp',
   './src/functionality/json.cpp',
+  './src/functionality/sync.cpp',
   './src/main.cpp',
   './src/planList.cpp',
   './src/planPage.cpp',

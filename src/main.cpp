@@ -16,6 +16,7 @@ void App::on_activate() {
     add_window(*window);
     window->set_title("Planning");
 
+    downloadDataFromServer();
     appData = initLoadJSON();
 
     // CSS
@@ -38,6 +39,12 @@ void App::on_activate() {
 
     stack->set_visible_child("list"); // inital page
     window->set_child(*stack);
+
+    window->signal_close_request().connect([this]() {
+        uploadDataToServer();
+        return false; // Let window close
+    }, false);
+
     window->present();
 };
 
