@@ -21,7 +21,8 @@ public:
     PlanListPage* listPage = nullptr;
     Gtk::Stack* stack = nullptr;
     json appData;
-    void openPlan(const Glib::ustring& name);
+    std::string focusedList;
+    void openPlan(const Glib::ustring& name, const std::string& focusedList = "");
     void on_activate() override;
 };
 

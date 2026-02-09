@@ -6,10 +6,9 @@
 using json = nlohmann::json;
 
 void addPlanToJSON(json& data, const std::string& name) {
-    data["plans"].push_back({
-        {"name", name},
-        {"lists", json::array()}
-    });
+    json newPlan;
+    newPlan[name] = json::object();
+    data["plans"].push_back(newPlan);
 };
 
 Gtk::MenuButton* makePlanButton() {
@@ -31,6 +30,7 @@ Gtk::MenuButton* makePlanButton() {
     hbox->append(*sendButton);
 
     popover->set_autohide(false); // fix weird close instantly issue
+    popover->signal_show().connect([entry]() { entry->grab_focus(); });
 
     // Create new plan
     auto submit = [entry, popover]() {
@@ -49,26 +49,10 @@ Gtk::MenuButton* makePlanButton() {
 
 void deletePlanFromJSON(json& data, const std::string& name) {
     auto& arr = data["plans"];
-
     auto it = std::remove_if(arr.begin(), arr.end(),
         [&](const json& p) {
-            return p["name"].get<std::string>() == name;
+            return p.contains(name);
         }
     );
     arr.erase(it, arr.end());
 };
-
-// Update this function to match the new schema:
-void addPlanToJSON(json& data, const std::string& name) {
-    json newPlan;
-    newPlan["plan_name"] = json::object();
-    data["plans"].push_back(newPlan);
-}
-
-// Update delete to use index instead of name:
-void deletePlanFromJSON(json& data, int planIndex) {
-    auto& arr = data["plans"];
-    if (planIndex >= 0 && planIndex < arr.size()) {
-        arr.erase(arr.begin() + planIndex);
-    }
-}

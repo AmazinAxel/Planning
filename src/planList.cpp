@@ -25,7 +25,7 @@ PlanListPage::PlanListPage(json& data): Gtk::Box(Gtk::Orientation::VERTICAL), ap
     scroll->set_child(*listBox);
     append(*scroll);
 
-    // Add all plans 
+    // Add all plans
     refresh();
 };
 
@@ -38,9 +38,9 @@ void PlanListPage::addPlan(const std::string& name) {
 void PlanListPage::refresh() {
     while (auto child = listBox->get_first_child())
         listBox->remove(*child);
-        
+
     for (auto& plan: appData["plans"]) {
-        Glib::ustring name = plan["name"].get<std::string>();
+        Glib::ustring name = plan.begin().key();
         auto btn = Gtk::make_managed<Gtk::Button>(name);
         btn->add_css_class("planName");
 

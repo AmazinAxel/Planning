@@ -41,7 +41,8 @@ void App::on_activate() {
     window->present();
 };
 
-void App::openPlan(const Glib::ustring& planName) {
+void App::openPlan(const Glib::ustring& planName, const std::string& focusedList) {
+    this->focusedList = focusedList;
     if (auto lastStack = stack->get_child_by_name("plan"))
         stack->remove(*lastStack); // Remove previous stack
 
