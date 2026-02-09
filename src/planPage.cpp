@@ -9,6 +9,7 @@ using json = nlohmann::json;
 Gtk::Box* planPage(Gtk::Stack* stack, json& appData, const Glib::ustring& planName) {
     auto planPage = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::VERTICAL);
     auto header = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::HORIZONTAL);
+    header->add_css_class("appHeader");
 
     // Go back button
     auto backBtn = Gtk::make_managed<Gtk::Button>();

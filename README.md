@@ -1,10 +1,10 @@
 # Planning
 
-A list-oriented GTK ideation and daily planner. Works offline and can back up/pull from a NAS when needed.
+A list-oriented GTK ideation and daily planner. Works offline and syncs to a NAS when needed.
 
 ## Vision
 
-Milanote and Trello are the two primary competitors for tracking and planning your goals and tasks. But there's a fundamental distraction problem with both. It's easy to get lost in the customization and organization of little details to make your planner pixel perfect. Planning is a hyperfocused alternative that is text-only (no images or mind maps - this is what Obsidian is for), not web based and works offline so you can ideate and plan without any distractions.
+Milanote and Trello are the two primary competitors for tracking and planning your goals and tasks. But there's a fundamental distraction problem with both. It's easy to get lost in the customization and organization of little details to make your planner pixel perfect. Planning is a hyperfocused alternative that is text-only (no stimulating images or mind maps - this is what Obsidian is for), not browser-based and works offline so you can ideate and plan without any distractions.
 
 ## Sync with a Samba server
 
@@ -27,4 +27,4 @@ Setup: `meson setup build` and build: `meson compile -C build && ./build/plannin
 
 ## Tip
 
-Use your arrow keys and press escape to go back. Press `ctrl + d` to delete a plan.
+Use your arrow keys and press escape to go back. Press `ctrl + d` to delete a plan. This app is best used with the GTK4 Nord theme.
