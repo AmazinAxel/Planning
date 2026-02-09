@@ -28,13 +28,13 @@ bool downloadDataFromServer() {
     std::string password = config.value("password", "");
     std::string share    = config.value("smbshare", "");
 
-    auto data_path = Glib::get_user_config_dir() + "/planningData.json";
+    auto data_path = Glib::get_user_config_dir() + "/planning/data.json";
 
     std::vector<std::string> argv = {
         "smbclient", "//" + server + "/" + share,
         "-U", user + "%" + password,
         "-W", group,
-        "-c", "get data.json " + data_path
+        "-c", "get planningData.json " + data_path
     };
 
     try {
@@ -42,7 +42,7 @@ bool downloadDataFromServer() {
         int status;
         Glib::spawn_sync("", argv, Glib::SpawnFlags::SEARCH_PATH, {}, &out, &err, &status);
         if (status != 0) {
-            std::cerr << "Download from server failed: " << err << std::endl;
+            std::cerr << "Download from server failed: " << out << err << std::endl;
             return false;
         };
     } catch (const Glib::Error& err) {
@@ -62,13 +62,13 @@ void uploadDataToServer() {
     std::string password = config.value("password", "");
     std::string share    = config.value("smbshare", "");
 
-    auto data_path = Glib::get_user_config_dir() + "/planningData.json";
+    auto data_path = Glib::get_user_config_dir() + "/planning/data.json";
 
     std::vector<std::string> argv = {
         "smbclient", "//" + server + "/" + share,
         "-U", user + "%" + password,
         "-W", group,
-        "-c", "put " + data_path + " data.json"
+        "-c", "put " + data_path + " planningData.json"
     };
 
     try {
@@ -76,7 +76,7 @@ void uploadDataToServer() {
         int status;
         Glib::spawn_sync("", argv, Glib::SpawnFlags::SEARCH_PATH, {}, &out, &err, &status);
         if (status != 0)
-            std::cerr << "Upload to server failed: " << err << std::endl;
+            std::cerr << "Upload to server failed: " << out << err << std::endl;
     } catch (const Glib::Error& err) {
         std::cerr << "Upload to server error: " << err.what() << std::endl;
     };
