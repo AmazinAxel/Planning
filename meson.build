@@ -8,7 +8,6 @@ project(
 gtkmm_dep = dependency('gtkmm-4.0') # c++ for gtk
 json = dependency('nlohmann_json') # json
 giomm = dependency('giomm-2.68') # Gio
-#server = get_option('server')
 
 sources = files(
   './src/functionality/lists/lists.cpp',
@@ -24,8 +23,5 @@ executable(
   'planning',
   sources,
   dependencies: [ gtkmm_dep, json, giomm ],
-  cpp_args: [
-    '-O2',
-    #'-DSERVER="' + server + '"'
-  ]
+  cpp_args: [ '-O2' ]
 )

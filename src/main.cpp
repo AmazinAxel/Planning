@@ -3,6 +3,7 @@
 #include <gtkmm/stack.h>
 #include "app.hpp"
 #include "functionality/utils.hpp"
+#include "style.hpp"
 
 #include <nlohmann/json.hpp>
 using json = nlohmann::json;
@@ -19,15 +20,10 @@ void App::on_activate() {
     isSynced = downloadDataFromServer();
     appData = initLoadJSON();
 
-    // CSS
     GtkCssProvider *provider = gtk_css_provider_new();
-    gtk_css_provider_load_from_path(provider, "src/style.css");
+    gtk_css_provider_load_from_string(provider, CSS);
     GdkDisplay *display = gdk_display_get_default();
-    gtk_style_context_add_provider_for_display(
-        display,
-        GTK_STYLE_PROVIDER(provider),
-        GTK_STYLE_PROVIDER_PRIORITY_USER
-    );
+    gtk_style_context_add_provider_for_display(display, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_USER);
     g_object_unref(provider);
 
     // App stack
