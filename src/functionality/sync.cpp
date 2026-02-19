@@ -1,4 +1,3 @@
-#include <glibmm/error.h>
 #include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>
 #include <glibmm/spawn.h>
