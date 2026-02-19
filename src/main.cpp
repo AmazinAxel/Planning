@@ -1,12 +1,8 @@
-#include <gtkmm/application.h>
 #include <gtkmm/applicationwindow.h>
-#include <gtkmm/stack.h>
-#include "app.hpp"
-#include "functionality/utils.hpp"
-#include "style.hpp"
 
-#include <nlohmann/json.hpp>
-using json = nlohmann::json;
+#include "app.hpp"
+#include "style.hpp"
+#include "functionality/utils.hpp"
 
 App* App::instance = nullptr;
 App* App::get() { return instance; }

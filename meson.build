@@ -5,7 +5,7 @@ project(
   default_options: [ 'cpp_std=c++17' ]
 )
 
-gtkmm_dep = dependency('gtkmm-4.0') # c++ for gtk
+gtkmm = dependency('gtkmm-4.0') # c++ for gtk
 json = dependency('nlohmann_json') # json
 giomm = dependency('giomm-2.68') # Gio
 
@@ -22,6 +22,6 @@ sources = files(
 executable(
   'planning',
   sources,
-  dependencies: [ gtkmm_dep, json, giomm ],
+  dependencies: [ gtkmm, json, giomm ],
   cpp_args: [ '-O2' ]
 )

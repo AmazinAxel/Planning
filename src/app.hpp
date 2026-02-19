@@ -1,6 +1,7 @@
 #pragma once
-#include <gtkmm.h>
-#include <functional>
+#include <gtkmm/application.h>
+#include <gtkmm/box.h>
+#include <gtkmm/stack.h>
 
 #include <nlohmann/json.hpp>
 using json = nlohmann::json;

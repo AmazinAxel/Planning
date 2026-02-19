@@ -1,5 +1,7 @@
-#include <glibmm.h>
-#include <giomm.h> // Gio file stuff
+#include <giomm/file.h>
+#include <glibmm/fileutils.h>
+#include <glibmm/miscutils.h>
+
 #include <nlohmann/json.hpp>
 using json = nlohmann::json;
 

@@ -48,5 +48,4 @@ static const char CSS[] = R"CSS(
 
 	/* No annoying button outlines */
 	button { outline-width: 0px; outline: none; }
-
 )CSS";

@@ -1,7 +1,6 @@
-#include <gtkmm.h> // todo
-#include <functional>
+#include <gtkmm/menubutton.h>
 
-#include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
 using json = nlohmann::json;
 
 void addListToPlanJSON(json& data, const std::string& planName, const std::string& listName);

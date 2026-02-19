@@ -1,8 +1,11 @@
-#include <glibmm.h> // todo
-#include <nlohmann/json.hpp>
-#include <string>
+#include <glibmm/error.h>
+#include <glibmm/fileutils.h>
+#include <glibmm/miscutils.h>
+#include <glibmm/spawn.h>
+
 #include <iostream>
 
+#include <nlohmann/json.hpp>
 using json = nlohmann::json;
 
 // If sync config is set, return it
@@ -56,11 +59,11 @@ void uploadDataToServer() {
     json config;
     if (!getSyncConfig(config)) return;
 
-    std::string server   = config["smbserver"];
-    std::string user     = config.value("user", "");
-    std::string group    = config.value("group", "workgroup");
+    std::string server = config["smbserver"];
+    std::string user = config.value("user", "");
+    std::string group = config.value("group", "workgroup");
     std::string password = config.value("password", "");
-    std::string share    = config.value("smbshare", "");
+    std::string share = config.value("smbshare", "");
 
     auto data_path = Glib::get_user_config_dir() + "/planning/data.json";
 

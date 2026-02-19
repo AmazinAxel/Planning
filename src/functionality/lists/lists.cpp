@@ -1,9 +1,11 @@
-#include <gtkmm.h> // todo
+#include <gtkmm/box.h>
+#include <gtkmm/button.h>
+#include <gtkmm/entry.h>
+#include <gtkmm/menubutton.h>
+#include <gtkmm/popover.h>
+
 #include "../../app.hpp"
 #include "../utils.hpp"
-
-#include <nlohmann/json.hpp>
-using json = nlohmann::json;
 
 static json* findPlan(json& data, const std::string& planName) {
     for (auto& plan: data["plans"]) {

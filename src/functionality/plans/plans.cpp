@@ -1,9 +1,10 @@
-#include <gtkmm.h>
-#include <iostream>
-#include "../../app.hpp"
+#include <gtkmm/box.h>
+#include <gtkmm/button.h>
+#include <gtkmm/entry.h>
+#include <gtkmm/menubutton.h>
+#include <gtkmm/popover.h>
 
-#include <nlohmann/json.hpp>
-using json = nlohmann::json;
+#include "../../app.hpp"
 
 void addPlanToJSON(json& data, const std::string& name) {
     json newPlan;

@@ -1,10 +1,19 @@
+#include <glibmm/main.h>
+#include <glibmm/markup.h>
+#include <gtkmm/button.h>
+#include <gtkmm/entry.h>
+#include <gtkmm/eventcontrollerfocus.h>
+#include <gtkmm/eventcontrollerkey.h>
+#include <gtkmm/image.h>
+#include <gtkmm/label.h>
+#include <gtkmm/scrolledwindow.h>
+
+#include <gdk/gdkkeysyms.h>
+
 #include "app.hpp"
 #include "functionality/plans/plans.hpp"
 #include "functionality/lists/lists.hpp"
 #include "functionality/utils.hpp"
-
-#include <nlohmann/json.hpp>
-using json = nlohmann::json;
 
 Gtk::Box* planPage(Gtk::Stack* stack, json& appData, const Glib::ustring& planName) {
     auto planPage = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::VERTICAL);

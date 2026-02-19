@@ -1,3 +1,7 @@
+#include <gtkmm/button.h>
+#include <gtkmm/label.h>
+#include <gtkmm/scrolledwindow.h>
+
 #include "app.hpp"
 #include "functionality/plans/plans.hpp"
 #include "functionality/utils.hpp"

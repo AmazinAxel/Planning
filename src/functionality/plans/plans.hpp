@@ -1,6 +1,6 @@
-#include <gtkmm.h> // todo
+#include <gtkmm/menubutton.h>
 
-#include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
 using json = nlohmann::json;
 
 Gtk::MenuButton* makePlanButton();
