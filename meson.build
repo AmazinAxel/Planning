@@ -2,12 +2,14 @@ project(
   'planning',
   'cpp',
   version: '1.0.0',
+  meson_version: '>= 1.8.0',
   default_options: [ 'cpp_std=c++17' ]
 )
 
-gtkmm = dependency('gtkmm-4.0') # c++ for gtk
-json = dependency('nlohmann_json') # json
-giomm = dependency('giomm-2.68') # Gio
+gtkmm = dependency('gtkmm-4.0')
+json = dependency('nlohmann_json', fallback: ['nlohmann_json', 'nlohmann_json_dep'])
+giomm = dependency('giomm-2.68')
+glib = dependency('glib-2.0')
 
 sources = files(
   './src/functionality/lists/lists.cpp',
@@ -22,6 +24,7 @@ sources = files(
 executable(
   'planning',
   sources,
-  dependencies: [ gtkmm, json, giomm ],
+  dependencies: [ gtkmm, json, giomm, glib ],
+  android_exe_type: 'application',
   cpp_args: [ '-O2' ]
 )

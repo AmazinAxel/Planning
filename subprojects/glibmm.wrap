@@ -1,0 +1,5 @@
+[wrap-git]
+directory=glibmm
+url=https://github.com/GNOME/glibmm.git
+revision=master
+depth=1

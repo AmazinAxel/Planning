@@ -1,0 +1,5 @@
+[wrap-git]
+directory=pangomm
+url=https://github.com/GNOME/pangomm.git
+revision=master
+depth=1

@@ -1,0 +1,8 @@
+[wrap-git]
+directory=gtkmm
+url=https://github.com/GNOME/gtkmm.git
+revision=master
+depth=1
+
+[provide]
+dependency_names=gtkmm-4.0

@@ -1,1 +1,7 @@
 build/
+
+# Pixiewood stuff
+.pixiewood
+subprojects/*
+.buildconfig
+!*.wrap

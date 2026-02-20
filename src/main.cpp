@@ -49,7 +49,7 @@ void App::openPlan(const Glib::ustring& planName, const std::string& focusedList
     stack->set_visible_child("plan");
 };
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv, char**) {
     auto app = Glib::make_refptr_for_instance<App>(new App());
     return app->run(argc, argv);
 };

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<app xmlns="https://sp1rit.arpa/pixiewood/">
+  <metainfo vercalc="identity">
+    <component xmlns="https://specifications.freedesktop.org/metainfo/1.0" type="desktop-application">
+      <id>com.amazinaxel.Planning</id>
+      <name>Planning</name>
+      <summary>todo</summary>
+      <releases>
+        <release version="1" date="2026-02-19"/>
+      </releases>
+    </component>
+  </metainfo>
+  <style>
+    <theme name="gtk"/>
+  </style>
+  <dependencies>
+    <glib>
+      <patch>hack</patch>
+    </glib>
+    <harfbuzz/>
+    <fontconfig/>
+    <gdk-pixbuf/>
+  </dependencies>
+  <build target="planning">
+    <architectures>
+      <arch>aarch64</arch>
+      <arch>x86_64</arch>
+    </architectures>
+  </build>
+</app>

@@ -1,0 +1,5 @@
+[wrap-git]
+directory=cairomm
+url=https://github.com/freedesktop/cairomm.git
+revision=master
+depth=1
