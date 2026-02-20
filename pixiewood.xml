@@ -12,6 +12,9 @@
   </metainfo>
   <style>
     <theme name="gtk"/>
+    <icon type="generate">
+			<color target="background">#FFFFFF</color>
+		</icon>
   </style>
   <dependencies>
     <glib>

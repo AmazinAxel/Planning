@@ -4,4 +4,3 @@ build/
 .pixiewood
 subprojects/*
 .buildconfig
-!*.wrap
