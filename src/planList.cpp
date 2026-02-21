@@ -53,6 +53,7 @@ void PlanListPage::refresh() {
         Glib::ustring name = plan.begin().key();
         auto btn = Gtk::make_managed<Gtk::Button>(name);
         btn->add_css_class("planName");
+        btn->set_halign(Gtk::Align::CENTER);
 
         btn->signal_clicked().connect([name]() {
             App::get()->openPlan(name);

@@ -32,7 +32,7 @@ static const char CSS[] = R"CSS(
 	.appHeader { padding-bottom: 1rem; }
 
 	label.headerText {
-		font-size: 2rem;
+		font-size: 2.5rem;
 		font-family: 'Hammersmith One';
 		color: var(--lightest3);
 	}
@@ -40,8 +40,11 @@ static const char CSS[] = R"CSS(
 	/* Plan list */
 
 	button.planName {
-		font-size: 1.5rem;
+		font-size: 2rem;
 		font-family: 'Sora';
+		color: var(--lightest3);
+		padding: 1rem 0;
+		min-width: 30rem;
 	}
 
 	label.isSynced { color: var(--darkest4); }
