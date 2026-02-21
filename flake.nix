@@ -13,6 +13,11 @@
         buildToolsVersions = [ "34.0.0" "35.0.0" ];
         includeNDK = true;
         ndkVersions = [ "27.0.12077973" ];
+        includeEmulator = true;
+        includeSystemImages = true;
+        systemImageTypes = [ "google_apis" ];
+        abiVersions = [ "x86_64" "arm64-v8a" ];
+        cmakeVersions = [ ];
       };
 
       androidSdk = androidComposition.androidsdk;
@@ -51,6 +56,10 @@
           libxslt
           # Android
           androidSdk
+
+          # dumb emulation stuff because my phone is running a 32bit OS on a 64bit processor (on a modern android version!) for some reason
+          androidSdk
+          qemu_kvm
 
           # could be needed?
           #graphviz
