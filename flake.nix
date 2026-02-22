@@ -13,6 +13,7 @@
         gcc
         pkg-config
         meson
+        ccache # caching
         ninja
       ];
     };

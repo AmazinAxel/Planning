@@ -25,6 +25,7 @@ void App::on_activate() {
     // App stack
     stack = Gtk::make_managed<Gtk::Stack>();
     stack->set_transition_type(Gtk::StackTransitionType::SLIDE_LEFT_RIGHT);
+    stack->set_transition_duration(100);
 
     listPage = Gtk::make_managed<PlanListPage>(appData);
     stack->add(*listPage, "list", "List");

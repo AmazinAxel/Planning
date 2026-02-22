@@ -43,7 +43,6 @@ sudo make install
 
 If you're on NixOS, enter the android devshell (`nix-shell androidDevshell.nix`) and then run:
 
-
 ```bash
 perl /usr/opt/gtk-android-builder/pixiewood --verbose prepare -s "$ANDROID_SDK_ROOT" -t "$ANDROID_NDK_ROOT"/<version number here like 27.0
 .12077973> pixiewood.xml

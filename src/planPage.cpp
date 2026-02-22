@@ -6,7 +6,11 @@
 #include <gtkmm/eventcontrollerkey.h>
 #include <gtkmm/image.h>
 #include <gtkmm/label.h>
+#include <gtkmm/adjustment.h>
+#include <gtkmm/gesturedrag.h>
 #include <gtkmm/scrolledwindow.h>
+
+#include <memory>
 
 #include <gdk/gdkkeysyms.h>
 
@@ -46,6 +50,20 @@ Gtk::Box* planPage(Gtk::Stack* stack, json& appData, const Glib::ustring& planNa
     scroll->set_child(*listsBox);
     scroll->set_vexpand(true);
     scroll->set_policy(Gtk::PolicyType::AUTOMATIC, Gtk::PolicyType::AUTOMATIC);
+
+    // Drag to scroll
+    auto drag = Gtk::GestureDrag::create();
+    auto startH = std::make_shared<double>(0.0);
+    auto startV = std::make_shared<double>(0.0);
+    drag->signal_drag_begin().connect([scroll, startH, startV](double, double) {
+        *startH = scroll->get_hadjustment()->get_value();
+        *startV = scroll->get_vadjustment()->get_value();
+    });
+    drag->signal_drag_update().connect([scroll, startH, startV](double dx, double dy) {
+        scroll->get_hadjustment()->set_value(*startH - dx);
+        scroll->get_vadjustment()->set_value(*startV - dy);
+    });
+    scroll->add_controller(drag);
 
     // Refresh function to rebuild all lists from JSON
     auto refreshLists = [listsBox, &appData, planName]() {
@@ -97,11 +115,11 @@ Gtk::Box* planPage(Gtk::Stack* stack, json& appData, const Glib::ustring& planNa
                     // Save on Enter or focus-out
                     entryEdit->signal_activate().connect([entryEdit, &appData, name, listName, entryId]() {
                         auto newVal = std::string(entryEdit->get_text());
-                        if (newVal.empty()) {
+                        if (newVal.empty())
                             deleteEntryFromListJSON(appData, name, listName, entryId);
-                        } else {
+                        else
                             editEntryInListJSON(appData, name, listName, entryId, newVal);
-                        }
+
                         saveJSON(appData);
                     });
 
@@ -115,7 +133,7 @@ Gtk::Box* planPage(Gtk::Stack* stack, json& appData, const Glib::ustring& planNa
                         } else {
                             editEntryInListJSON(appData, name, listName, entryId, newVal);
                             saveJSON(appData);
-                        }
+                        };
                     });
                     entryEdit->add_controller(focusCtrl);
 
