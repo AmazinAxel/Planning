@@ -26,5 +26,6 @@ executable(
   sources,
   dependencies: [ gtkmm, json, giomm, glib ],
   android_exe_type: 'application',
+  install: true,
   cpp_args: [ '-O2' ]
 )

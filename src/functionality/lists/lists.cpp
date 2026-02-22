@@ -75,7 +75,7 @@ Gtk::MenuButton* makeListButton(const std::string& planName, std::function<void(
     hbox->append(*entry);
 
     auto sendButton = Gtk::make_managed<Gtk::Button>();
-    sendButton->set_icon_name("mail-forward-symbolic");
+    sendButton->set_icon_name("mail-reply-sender-symbolic");
     hbox->append(*sendButton);
 
     popover->set_autohide(false);

@@ -60,6 +60,7 @@
           # dumb emulation stuff because my phone is running a 32bit OS on a 64bit processor (on a modern android version!) for some reason
           androidSdk
           qemu_kvm
+          xcb-util-cursor
 
           # could be needed?
           #graphviz
@@ -67,6 +68,7 @@
           #docbook_xsl
           #glib
           sassc
+          python3
         ];
 
         shellHook = ''

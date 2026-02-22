@@ -46,6 +46,22 @@ perl /usr/opt/gtk-android-builder/pixiewood --verbose prepare -s "$ANDROID_SDK_R
 .12077973> pixiewood.xml
 perl /usr/opt/gtk-android-builder/pixiewood generate
 
+# Pixiewood requires icons for generation so run this entire block of code as a command
+
+RES_DIR=$(find .pixiewood -path "*/app/src/main/res" -type d | head -1)
+for density in mdpi hdpi xhdpi xxhdpi xxxhdpi; do
+  mkdir -p "$RES_DIR/mipmap-$density"
+  printf '\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x02\x00\x00\x00\x90wS\xde\x00\x00\x00\x0cIDATx\x9cc\xa8\x16\x00\x00\x00\x06\x00\x01\xe4\x16\xda\xf2\x00\x00\x00\x00IEND\xaeB`\x82' > "$RES_DIR/mipmap-$density/ic_launcher.png"
+done
+
+RES_DIR=".pixiewood/android/app/src/main/res"
+for density in mdpi hdpi xhdpi xxhdpi xxxhdpi; do
+  cp "$RES_DIR/mipmap-$density/ic_launcher.png" "$RES_DIR/mipmap-$density/ic_launcher_round.png"
+done
+
+#---
+
+
 # This fixes all the build errors
 meson configure .pixiewood/bin-aarch64 -Dgtk4:media-gstreamer=disabled
 meson configure .pixiewood/bin-x86_64 -Dgtk4:media-gstreamer=disabled
@@ -54,26 +70,40 @@ meson configure .pixiewood/bin-aarch64 -Dsigc++-3.0:build-documentation=false
 meson configure .pixiewood/bin-x86_64 -Dsigc++-3.0:build-documentation=false
 meson configure .pixiewood/bin-aarch64 -Dsigc++-3.0:build-documentation=false -Dsigc++-3.0:build-manual=false
 
+
+perl /usr/opt/gtk-android-builder/pixiewood build
+
 # Make sure that pixiewood is including all the files (otherwise the app crashes on start)
 cp -r subprojects/gtk/gdk/android/glue/java/org .pixiewood/android/app/src/main/java/
 mkdir -p .pixiewood/android/app/src/main/jniLibs/arm64-v8a
 mkdir -p .pixiewood/android/app/src/main/jniLibs/x86_64
 cp .pixiewood/root/lib/arm64-v8a/*.so .pixiewood/android/app/src/main/jniLibs/arm64-v8a/
 cp .pixiewood/root/lib/x86_64/*.so .pixiewood/android/app/src/main/jniLibs/x86_64/
+cp .pixiewood/bin-x86_64/libplanning.so .pixiewood/android/app/src/main/jniLibs/x86_64/
+cp .pixiewood/bin-aarch64/libplanning.so .pixiewood/android/app/src/main/jniLibs/arm64-v8a/
 
-perl /usr/opt/gtk-android-builder/pixiewood build
+cp -r graphite-dark-nord/* .pixiewood/android/app/src/main/assets/share/gtk-4.0/
+
+cp $ANDROID_NDK_ROOT/<your version number thing here>/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/x86_64-linux-android/libc++_shared.so .pixiewood/android/app/src/main/jniLibs/x86_64/
+cp $ANDROID_NDK_ROOT/<your version number thing here>/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/aarch64-linux-android/libc++_shared.so .pixiewood/android/app/src/main/jniLibs/arm64-v8a/
+# Then rebuild again
 ```
 
-If you encounter conflicting file errors when preparing, go into the conflicting files and delete the `[provide]` section. If on NixOS, add `programs.nix-ld.enable = true;` to your config.
+If on NixOS, add `programs.nix-ld.enable = true;` to your config.
 
 ### Android emulation
 
-TOOD
-
 ```bash
-avdmanager create avd -n test_device -k "system-images;android-34;google_apis;x86_64" --device "pixel"
-export ANDROID_AVD_HOME=/home/alec/.config/.android/avd
+avdmanager create avd -n planningDevice -k "system-images;android-34;google_apis;x86_64" --device "pixel"
+
+# This command allocates 4GB of memory, reduce this value if you're on a low end computer
+emulator -avd planningDevice -cores 4 -memory 4096 -gpu swiftshader_indirect -no-snapshot
+
+# In your IDE:
+adb install -r .pixiewood/android/app/build/outputs/apk/debug/app-x86_64-debug.apk && adb shell am start -n com.amazinaxel.planning/org.gtk.android.ToplevelActivity
 ```
+
+If you're on Wayland, you will need to enable XWayland for your compositor.
 
 ## Tips
 

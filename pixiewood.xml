@@ -11,10 +11,10 @@
     </component>
   </metainfo>
   <style>
-    <theme name="gtk"/>
+    <theme name="adw-dark"/>
     <icon type="generate">
-			<color target="background">#FFFFFF</color>
-		</icon>
+      <color target="background">#FFFFFF</color>
+    </icon>
   </style>
   <dependencies>
     <glib>

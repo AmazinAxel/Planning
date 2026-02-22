@@ -44,7 +44,7 @@ static const char CSS[] = R"CSS(
 		font-family: 'Sora';
 		color: var(--lightest3);
 		padding: 1rem 0;
-		min-width: 30rem;
+		min-width: 25rem;
 	}
 
 	label.isSynced { color: var(--darkest4); }
