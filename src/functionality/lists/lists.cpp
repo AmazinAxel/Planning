@@ -24,16 +24,30 @@ static int nextEntryId(const json& entries) {
     return maxId + 1;
 };
 
-void addListToPlanJSON(json& data, const std::string& planName, const std::string& listName) {
+int addListToPlanJSON(json& data, const std::string& planName, const std::string& listName) {
     auto* plan = findPlan(data, planName);
     (*plan)[listName] = {{"entries", json::array()}};
-};
 
-void addEntryToListJSON(json& data, const std::string& planName, const std::string& listName, const std::string& value) {
-    auto* plan = findPlan(data, planName);
+    // Put in a placeholder value so that the input box appears
     auto& entries = (*plan)[listName]["entries"];
     int id = nextEntryId(entries);
-    entries.push_back({{"id", id}, {"value", value}});
+    entries.push_back({{"id", id}, {"value", ""}});
+    return id;
+};
+
+int addEntryToListJSON(json& data, const std::string& planName, const std::string& listName, int afterId) {
+    auto* plan = findPlan(data, planName);
+    auto& entries = (*plan)[listName]["entries"];
+    int newId = nextEntryId(entries);
+    json newEntry = {{"id", newId}, {"value", ""}};
+    for (auto it = entries.begin(); it != entries.end(); ++it) {
+        if ((*it)["id"].get<int>() == afterId) {
+            entries.insert(it + 1, newEntry);
+            return newId;
+        };
+    };
+    entries.push_back(newEntry);
+    return newId;
 };
 
 void deleteListFromPlanJSON(json& data, const std::string& planName, const std::string& listName) {
@@ -84,8 +98,11 @@ Gtk::MenuButton* makeListButton(const std::string& planName, std::function<void(
     auto submit = [entry, popover, planName, refreshCallback]() {
         auto listName = entry->get_text();
         if (!listName.empty()) {
-            addListToPlanJSON(App::get()->appData, planName, listName);
+            std::string ln = std::string(listName);
+            int entryID = addListToPlanJSON(App::get()->appData, planName, ln);
             saveJSON(App::get()->appData);
+            App::get()->focusedList = ln;
+            App::get()->focusedEntryID = entryID;
             entry->set_text("");
             popover->popdown();
             refreshCallback();

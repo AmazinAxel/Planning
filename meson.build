@@ -13,6 +13,7 @@ glib = dependency('glib-2.0')
 
 sources = files(
   './src/functionality/lists/lists.cpp',
+  './src/functionality/lists/renderLists.cpp',
   './src/functionality/plans/plans.cpp',
   './src/functionality/json.cpp',
   './src/functionality/sync.cpp',

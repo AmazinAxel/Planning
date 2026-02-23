@@ -24,6 +24,7 @@ public:
     bool isSynced;
     json appData;
     std::string focusedList;
+    int focusedEntryID = -1;
     void openPlan(const Glib::ustring& name, const std::string& focusedList = "");
     void on_activate() override;
 };

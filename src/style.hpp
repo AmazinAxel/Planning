@@ -29,6 +29,8 @@ static const char CSS[] = R"CSS(
 
 	window { padding: 1rem; }
 
+	.appHeader button { padding: 0 0.75rem; } /* Make buttons actually circular */
+
 	.appHeader { padding-bottom: 1rem; }
 
 	label.headerText {
@@ -48,6 +50,17 @@ static const char CSS[] = R"CSS(
 	}
 
 	label.isSynced { color: var(--darkest4); }
+
+	/* Lists */
+	.listHeader {
+		font-family: 'Sora';
+		font-size: 1.4rem;
+		font-weight: bold;
+		color: var(--lightest2);
+		padding: 0.2rem;
+	}
+	.listSection * { border-radius: 0; }
+	.listSection { border-radius: 0.5rem; }
 
 	/* No annoying button outlines */
 	button { outline-width: 0px; outline: none; }
