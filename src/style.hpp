@@ -51,6 +51,8 @@ static const char CSS[] = R"CSS(
 
 	label.isSynced { color: var(--darkest4); }
 
+	entry.indented text { padding-left: 10px; }
+
 	/* Lists */
 	.listHeader {
 		font-family: 'Sora';

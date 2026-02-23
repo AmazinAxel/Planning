@@ -74,6 +74,17 @@ void editEntryInListJSON(json& data, const std::string& planName, const std::str
     };
 };
 
+void setEntryIndentInListJSON(json& data, const std::string& planName, const std::string& listName, int entryId, bool isIndented) {
+    auto* plan = findPlan(data, planName);
+    auto& entries = (*plan)[listName]["entries"];
+    for (auto& e: entries) {
+        if (e["id"].get<int>() == entryId) {
+            e["isIndented"] = isIndented;
+            return;
+        };
+    };
+};
+
 Gtk::MenuButton* makeListButton(const std::string& planName, std::function<void()> refreshCallback) {
     auto button = Gtk::make_managed<Gtk::MenuButton>();
     button->set_icon_name("list-add-symbolic");

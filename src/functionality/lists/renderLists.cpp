@@ -37,9 +37,12 @@ void renderLists(Gtk::Box* listsBox, json& appData, const std::string& planName)
             for (auto& entry: list["entries"]) {
                 int entryID = entry["id"].get<int>();
                 std::string entryData = entry["value"].get<std::string>();
+                bool isIndented = entry.value("isIndented", false);
 
                 auto entryRow = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::HORIZONTAL, 6);
                 auto entryEdit = Gtk::make_managed<Gtk::Entry>();
+                if (isIndented)
+                    entryEdit->add_css_class("indented");
                 entryEdit->set_text(entryData);
                 entryEdit->set_hexpand(true);
                 entryRow->append(*entryEdit);
@@ -67,31 +70,49 @@ void renderLists(Gtk::Box* listsBox, json& appData, const std::string& planName)
                 // Backspace: delete and focus the previous entry or delete list
                 auto keyCtrl = Gtk::EventControllerKey::create();
                 keyCtrl->set_propagation_phase(Gtk::PropagationPhase::CAPTURE); // fix bug
-                keyCtrl->signal_key_pressed().connect([entryEdit, &appData, planName, listName, entryID, handled](guint keyval, guint, Gdk::ModifierType) -> bool {
+                keyCtrl->signal_key_pressed().connect([entryEdit, &appData, planName, listName, entryID, handled](guint keyval, guint, Gdk::ModifierType state) -> bool {
+
+                    // Indent/de-indent
+                    if (keyval == GDK_KEY_Tab || keyval == GDK_KEY_ISO_Left_Tab) {
+                        bool shiftHeld = static_cast<int>(state & Gdk::ModifierType::SHIFT_MASK) != 0;
+                        auto newVal = std::string(entryEdit->get_text());
+                        editEntryInListJSON(appData, planName, listName, entryID, newVal);
+                        setEntryIndentInListJSON(appData, planName, listName, entryID, !shiftHeld);
+                        saveJSON(appData);
+                        App::get()->focusedEntryID = entryID;
+                        *handled = true;
+                        Glib::signal_idle().connect_once([&appData, planName, listName]() {
+                            App::get()->openPlan(planName, listName);
+                        });
+                        return true;
+                    };
                     if (keyval == GDK_KEY_BackSpace && entryEdit->get_text().empty()) {
-                        int prevID = -1;
+                        int prevID = -1, nextID = -1;
                         for (auto& p: appData["plans"]) {
                             if (!p.contains(planName)) continue;
+                            bool found = false;
                             for (auto& e : p[planName][listName]["entries"]) {
                                 int id = e["id"].get<int>();
-                                if (id == entryID) break;
-                                prevID = id;
+                                if (found) { nextID = id; break; }
+
+                                if (id == entryID)
+                                    found = true;
+                                else prevID = id;
                             };
                             break;
                         };
                         *handled = true;
 
-                        // Delete list
-                        if (prevID == -1) {
+                        if (prevID == -1 && nextID == -1) {
                             deleteListFromPlanJSON(appData, planName, listName);
                             saveJSON(appData);
                             Glib::signal_idle().connect_once([planName]() {
                                 App::get()->openPlan(planName);
                             });
-                        } else { // Go to prev entry
+                        } else { // Prev or next entry
                             deleteEntryFromListJSON(appData, planName, listName, entryID);
                             saveJSON(appData);
-                            App::get()->focusedEntryID = prevID;
+                            App::get()->focusedEntryID = (prevID != -1) ? prevID : nextID;
                             Glib::signal_idle().connect_once([planName, listName]() {
                                 App::get()->openPlan(planName, listName);
                             });
@@ -101,6 +122,15 @@ void renderLists(Gtk::Box* listsBox, json& appData, const std::string& planName)
                     return false;
                 }, false);
                 entryEdit->add_controller(keyCtrl);
+
+                // Save text on focus leave so re-renders wont break stuff
+                auto focusCtrl = Gtk::EventControllerFocus::create();
+                focusCtrl->signal_leave().connect([entryEdit, &appData, planName, listName, entryID, handled]() {
+                    if (*handled) return;
+                    editEntryInListJSON(appData, planName, listName, entryID, std::string(entryEdit->get_text()));
+                    saveJSON(appData);
+                });
+                entryEdit->add_controller(focusCtrl);
 
                 // Focus
                 if (listName == App::get()->focusedList && entryID == App::get()->focusedEntryID) {
