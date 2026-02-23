@@ -39,7 +39,10 @@ static const char CSS[] = R"CSS(
 		color: var(--lightest3);
 	}
 
+	.planPage { background-color: var(--darkest1); }
+
 	/* Plan list */
+	.planListHeader { padding: 8rem 0 1.5rem 0; }
 
 	button.planName {
 		font-size: 2rem;
@@ -52,6 +55,13 @@ static const char CSS[] = R"CSS(
 	label.isSynced { color: var(--darkest4); }
 
 	entry.indented text { padding-left: 10px; }
+
+	.addNewPlanButton {
+		-gtk-icon-size: 1.75rem;
+		padding: 0.5rem;
+		min-width: 4rem;
+		min-height: 4rem;
+	}
 
 	/* Lists */
 	.listHeader {

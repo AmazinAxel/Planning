@@ -10,15 +10,11 @@ PlanListPage::PlanListPage(json& data): Gtk::Box(Gtk::Orientation::VERTICAL), ap
     // Header
     auto header = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::HORIZONTAL);
     header->add_css_class("appHeader");
-
+    header->add_css_class("planListHeader");
     auto title = Gtk::make_managed<Gtk::Label>("Planning");
     title->add_css_class("headerText");
     title->set_hexpand(true);
-
     header->append(*title);
-
-    // Create new plan button
-    header->append(*makePlanButton());
     append(*header);
 
     // List box
@@ -61,4 +57,5 @@ void PlanListPage::refresh() {
 
         listBox->append(*btn);
     };
+    listBox->append(*makePlanButton()); // Create new plan button
 };

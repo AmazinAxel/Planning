@@ -14,6 +14,9 @@ void addPlanToJSON(json& data, const std::string& name) {
 Gtk::MenuButton* makePlanButton() {
     auto button = Gtk::make_managed<Gtk::MenuButton>();
     button->set_icon_name("list-add-symbolic");
+    button->set_halign(Gtk::Align::CENTER);
+    button->add_css_class("addNewPlanButton");
+
     auto popover = Gtk::make_managed<Gtk::Popover>();
     button->set_popover(*popover);
 

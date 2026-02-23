@@ -9,7 +9,10 @@ Milanote and Trello are the two primary options for planning your goals and task
 If you're on Nix, you're in luck! Just add this to the top of your `flake.nix`:
 
 ```nix
-inputs.planning.url = "path:/home/alec/Projects/Planning";
+planning = {
+  url = "github:AmazinAxel/Planning";
+  inputs.nixpkgs.follows = "nixpkgs";
+};
 ```
 
 And then include this in your configuration after importing `inputs`:

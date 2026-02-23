@@ -24,7 +24,7 @@ void renderLists(Gtk::Box* listsBox, json& appData, const std::string& planName)
             std::string listName = it.key();
             auto& list = it.value();
 
-            auto listSection = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::VERTICAL, 4);
+            auto listSection = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::VERTICAL);
             listSection->set_size_request(300, -1);
             listSection->set_spacing(0); // All entries link so it feels like a big text box
             listSection->add_css_class("listSection");

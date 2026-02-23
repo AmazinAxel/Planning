@@ -15,6 +15,7 @@
 
 Gtk::Box* planPage(Gtk::Stack* stack, json& appData, const Glib::ustring& planName) {
     auto planPage = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::VERTICAL);
+    planPage->add_css_class("planPage");
     auto header = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::HORIZONTAL);
     header->add_css_class("appHeader");
 
@@ -39,6 +40,7 @@ Gtk::Box* planPage(Gtk::Stack* stack, json& appData, const Glib::ustring& planNa
     listsBox->set_margin_end(12);
     listsBox->set_margin_top(8);
     listsBox->set_margin_bottom(8);
+    listsBox->set_spacing(20); // 20px gap between lists
 
     auto scroll = Gtk::make_managed<Gtk::ScrolledWindow>();
     scroll->set_child(*listsBox);
