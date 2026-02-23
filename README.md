@@ -4,6 +4,22 @@ A list-oriented GTK ideation and daily planner. Works offline and syncs to a NAS
 
 Milanote and Trello are the two primary options for planning your goals and tasks. But it's too easy to get lost in the customization and organization just to make your planner pixel perfect. Planning is a hyperfocused alternative that is text-only, not browser-based and works offline so you can ideate and plan without any distractions.
 
+## Install with Nix
+
+If you're on Nix, you're in luck! Just add this to the top of your `flake.nix`:
+
+```nix
+inputs.planning.url = "path:/home/alec/Projects/Planning";
+```
+
+And then include this in your configuration after importing `inputs`:
+
+```nix
+environment.systemPackages = [ inputs.planning.packages.${system}.default ];
+```
+
+And then rebuild. You can alternatively test out this program by running `nix shell github:AmazinAxel/Planning`
+
 ## Sync with a Samba server
 
 This app can upload or download its data from any Samba share.
