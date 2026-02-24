@@ -1,6 +1,6 @@
 #pragma once
 static const char CSS[] = R"CSS(
-	:root {
+	:root { /* Nord color scheme, probably messes with other gtk themes though */
 		/* Polar Night colors */
 		--darkest1: #2e3440;
 		--darkest2: #3b4252;
@@ -28,9 +28,7 @@ static const char CSS[] = R"CSS(
 	/* App */
 
 	window { padding: 1rem; }
-
 	.appHeader button { padding: 0 0.75rem; } /* Make buttons actually circular */
-
 	.appHeader { padding-bottom: 1rem; }
 
 	label.headerText {
@@ -38,8 +36,6 @@ static const char CSS[] = R"CSS(
 		font-family: 'Hammersmith One';
 		color: var(--lightest3);
 	}
-
-	.planPage { background-color: var(--darkest1); }
 
 	/* Plan list */
 	.planListHeader { padding: 8rem 0 1.5rem 0; }
@@ -53,7 +49,6 @@ static const char CSS[] = R"CSS(
 	}
 
 	label.isSynced { color: var(--darkest4); }
-
 	entry.indented text { padding-left: 10px; }
 
 	.addNewPlanButton {
@@ -73,6 +68,8 @@ static const char CSS[] = R"CSS(
 	}
 	.listSection * { border-radius: 0; }
 	.listSection { border-radius: 0.5rem; }
+
+	.planPage { background-color: var(--darkest1); }
 
 	/* No annoying button outlines */
 	button { outline-width: 0px; outline: none; }

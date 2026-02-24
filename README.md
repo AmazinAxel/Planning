@@ -36,6 +36,35 @@ Make sure you have Samba running and add these options to `~/.config/planning/da
 "smbshare": "USB",
 ```
 
+## Broadway web test
+
+I've set up a demo server running Broadway so you can test out this app in your browser. Due to how Broadway functions, the app is windowed like a desktop so you'll need to fullscreen the app. It also has padding which messes with the background color of plan pages (this is not visible in the binary release of the app)
+
+**The Broadway server is by no means a replacement of the actual application!** You should run the binary locally if you want your data to be saved. Anyone can edit or delete data in the Broadway session. There also seems to be some scrolling bugs and probably other issues which aren't present in the binary.
+
+Access it here: <https://planning.amazinaxel.com>
+
+Android and Linux prebuilt binaries are available in the Releases tab on this repo.
+
+## Run Broadway yourself
+
+Although this kind of defeats the entire purpose of this app being written in native GTK, you can run a Broadway server yourself so you can access the web version of Planning.
+
+I don't suggest this option if you're running Linux/MacOS, Windows, Android or any other OS which natively supports GTK. But since the web version can access a NAS share, this can be a good option if you want to connect all your unsupported devices (e.g. Apple) together.
+
+Open the project dev shell and run
+
+```bash
+gtk4-broadwayd :5
+GDK_BACKEND=broadway BROADWAY_DISPLAY=:5 gtk4-demo
+```
+
+By default the site will be visible at <http://127.0.0.1:8085>
+
+## Tips
+
+Use your arrow keys. Press `ctrl + d` to delete a plan. This app is best used with the GTK4 Nord dark theme.
+
 ## Build
 
 I recommend using NixOS for the best development experience. If you want to build on a platform other than Nix, refer to the flake.nix for dependencies.
@@ -124,7 +153,3 @@ adb install -r .pixiewood/android/app/build/outputs/apk/debug/app-x86_64-debug.a
 ```
 
 If you're on Wayland, you will need to enable XWayland for your compositor.
-
-## Tips
-
-Use your arrow keys and press escape to go back. Press `ctrl + d` to delete a plan. This app is best used with the GTK4 Nord dark theme.
