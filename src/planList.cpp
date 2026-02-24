@@ -20,6 +20,7 @@ PlanListPage::PlanListPage(json& data): Gtk::Box(Gtk::Orientation::VERTICAL), ap
     // List box
     listBox = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::VERTICAL);
     listBox->set_spacing(10);
+    listBox->set_margin_top(5); // Fix outline cut off
     listBox->set_vexpand(true);
     auto scroll = Gtk::make_managed<Gtk::ScrolledWindow>();
     scroll->set_child(*listBox);

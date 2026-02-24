@@ -30,6 +30,7 @@ Gtk::MenuButton* makePlanButton() {
 
     auto sendButton = Gtk::make_managed<Gtk::Button>();
     sendButton->set_icon_name("mail-reply-sender-symbolic");
+    sendButton->add_css_class("addNewPlanPopoverButton");
     hbox->append(*sendButton);
 
     popover->set_autohide(false); // fix weird close instantly issue

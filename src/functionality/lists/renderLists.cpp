@@ -68,9 +68,20 @@ void renderLists(Gtk::Box* listsBox, json& appData, const std::string& planName)
                 });
 
                 // Backspace: delete and focus the previous entry or delete list
+                auto escapeConfirm = std::make_shared<bool>(false); // Press escape twice to go back
                 auto keyCtrl = Gtk::EventControllerKey::create();
                 keyCtrl->set_propagation_phase(Gtk::PropagationPhase::CAPTURE); // fix bug
-                keyCtrl->signal_key_pressed().connect([entryEdit, &appData, planName, listName, entryID, handled](guint keyval, guint, Gdk::ModifierType state) -> bool {
+                keyCtrl->signal_key_pressed().connect([entryEdit, &appData, planName, listName, entryID, handled, escapeConfirm](guint keyval, guint, Gdk::ModifierType state) -> bool {
+
+                    if (keyval == GDK_KEY_Escape) {
+                        if (*escapeConfirm) // Go back
+                            App::get()->stack->set_visible_child("list");
+                        else // Select text first time
+                            entryEdit->select_region(0, -1);
+                        *escapeConfirm = true;
+                        return true;
+                    };
+                    *escapeConfirm = false;
 
                     // Indent/de-indent
                     if (keyval == GDK_KEY_Tab || keyval == GDK_KEY_ISO_Left_Tab) {
@@ -125,7 +136,8 @@ void renderLists(Gtk::Box* listsBox, json& appData, const std::string& planName)
 
                 // Save text on focus leave so re-renders wont break stuff
                 auto focusCtrl = Gtk::EventControllerFocus::create();
-                focusCtrl->signal_leave().connect([entryEdit, &appData, planName, listName, entryID, handled]() {
+                focusCtrl->signal_leave().connect([entryEdit, &appData, planName, listName, entryID, handled, escapeConfirm]() {
+                    *escapeConfirm = false;
                     if (*handled) return;
                     editEntryInListJSON(appData, planName, listName, entryID, std::string(entryEdit->get_text()));
                     saveJSON(appData);

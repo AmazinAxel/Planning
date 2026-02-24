@@ -27,9 +27,8 @@ static const char CSS[] = R"CSS(
 
 	/* App */
 
-	window { padding: 1rem; }
+	.appHeader { padding: 1rem; }
 	.appHeader button { padding: 0 0.75rem; } /* Make buttons actually circular */
-	.appHeader { padding-bottom: 1rem; }
 
 	label.headerText {
 		font-size: 2.5rem;
@@ -48,15 +47,17 @@ static const char CSS[] = R"CSS(
 		min-width: 25rem;
 	}
 
-	label.isSynced { color: var(--darkest4); }
+	label.isSynced { padding: 1rem; color: var(--darkest4); }
 	entry.indented text { padding-left: 10px; }
 
 	.addNewPlanButton {
-		-gtk-icon-size: 1.75rem;
 		padding: 0.5rem;
 		min-width: 4rem;
 		min-height: 4rem;
 	}
+
+	.addNewPlanButton image { -gtk-icon-size: 1.75rem; }
+	.addNewPlanPopoverButton image { -gtk-icon-size: 1rem; }
 
 	/* Lists */
 	.listHeader {
@@ -70,7 +71,4 @@ static const char CSS[] = R"CSS(
 	.listSection { border-radius: 0.5rem; }
 
 	.planPage { background-color: var(--darkest1); }
-
-	/* No annoying button outlines */
-	button { outline-width: 0px; outline: none; }
 )CSS";
