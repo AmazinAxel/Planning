@@ -85,6 +85,33 @@ void setEntryIndentInListJSON(json& data, const std::string& planName, const std
     };
 };
 
+// For dragging
+void moveEntryJSON(json& data, const std::string& fromPlan, const std::string& fromList, int entryId, const std::string& toPlan, const std::string& toList, int afterId) {
+    auto* fromPlanData = findPlan(data, fromPlan);
+    auto& fromEntries = (*fromPlanData)[fromList]["entries"];
+    json entryData;
+    for (auto& e: fromEntries)
+        if (e["id"].get<int>() == entryId) {
+            entryData = e; break;
+        };
+
+    // Remove
+    fromEntries.erase(std::remove_if(fromEntries.begin(), fromEntries.end(),
+        [entryId](const json& e) { return e["id"].get<int>() == entryId; }), fromEntries.end());
+
+    // Add
+    auto* toPlanData = findPlan(data, toPlan);
+    auto& toEntries = (*toPlanData)[toList]["entries"];
+    if (afterId == -1) {
+        toEntries.insert(toEntries.begin(), entryData);
+    } else {
+        for (auto it = toEntries.begin(); it != toEntries.end(); ++it) {
+            if ((*it)["id"].get<int>() == afterId) { toEntries.insert(it + 1, entryData); return; }
+        };
+        toEntries.push_back(entryData);
+    };
+};
+
 Gtk::MenuButton* makeListButton(const std::string& planName, std::function<void()> refreshCallback) {
     auto button = Gtk::make_managed<Gtk::MenuButton>();
     button->set_icon_name("list-add-symbolic");

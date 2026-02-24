@@ -67,7 +67,13 @@ static const char CSS[] = R"CSS(
 		color: var(--lightest2);
 		padding: 0.2rem;
 	}
-	.listSection * { border-radius: 0; }
+	.listSection *:not(.listHeader):not(.dropIndicator) {
+		border-radius: 0;
+		background-color: var(--darkest2);
+	}
+	entry text selection { color: var(--blue2); }
+
+	.dropIndicator { background-color: var(--blue2); min-height: 3px; }
 
 	.planPage { background-color: var(--darkest1); }
 )CSS";

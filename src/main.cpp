@@ -38,6 +38,11 @@ void App::on_activate() {
         return false; // Let window close
     }, false);
 
+    // For broadway auto fullscreen
+    window->set_decorated(false);
+    window->maximize();
+    //window->fullscreen();
+
     window->present();
 };
 

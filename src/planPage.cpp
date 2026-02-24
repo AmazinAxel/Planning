@@ -40,7 +40,7 @@ Gtk::Box* planPage(Gtk::Stack* stack, json& appData, const Glib::ustring& planNa
     listsBox->set_margin_end(12);
     listsBox->set_margin_top(8);
     listsBox->set_margin_bottom(8);
-    listsBox->set_spacing(20); // 20px gap between lists
+    listsBox->set_spacing(40); // 40px gap between lists
     listsBox->set_halign(Gtk::Align::CENTER);
 
     auto scroll = Gtk::make_managed<Gtk::ScrolledWindow>();

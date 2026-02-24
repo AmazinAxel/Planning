@@ -27,6 +27,9 @@ public:
     json appData;
     std::string focusedList;
     int focusedEntryID = -1;
+    std::string dragPlanName;
+    std::string dragListName;
+    int dragEntryID = -1;
     void openPlan(const Glib::ustring& name, const std::string& focusedList = "");
     void on_activate() override;
 };

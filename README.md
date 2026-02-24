@@ -36,21 +36,21 @@ Make sure you have Samba running and add these options to `~/.config/planning/da
 "smbshare": "USB",
 ```
 
+<!--
 ## Broadway web test
 
-I've set up a demo server running Broadway so you can test out this app in your browser. Due to how Broadway functions, the app is windowed like a desktop so you'll need to fullscreen the app.
-
-**The Broadway server is by no means a replacement of the actual application!** You should run the binary locally if you want your data to be saved. Anyone can edit or delete data in the Broadway session. There also seems to be some scrolling bugs and probably other issues which aren't present in the binary.
+I've set up a demo server running Broadway so you could run this app in your browser. Anyone can edit or delete data in the Broadway session, so please use your own application instead of relying on the hosted app. Access through Broadway is by no means a replacement for the native program and is not recommended on supported devices.
 
 Access it here: <https://planning.amazinaxel.com>
+-->
 
-Android and Linux prebuilt binaries are available in the Releases tab on this repo.
+## Run Broadway
 
-## Run Broadway yourself
+Broadway allows you to run Planning in your web browser.
 
-Although this kind of defeats the entire purpose of this app being written in native GTK, you can run a Broadway server yourself so you can access the web version of Planning.
+Although this kind of defeats the entire purpose of this app being written in native GTK, you can run a Broadway server yourself so you can access the web version of Planning. It can also sync with a NAS share so this can be a good option if you want to keep all your unsupported devices (e.g. Apple) synced.
 
-I don't suggest this option if you're running Linux/MacOS, Windows, Android or any other OS which natively supports GTK. But since the web version can access a NAS share, this can be a good option if you want to connect all your unsupported devices (e.g. Apple) together.
+I don't suggest this option if you're running Linux/MacOS, Windows, Android or any other OS which natively supports GTK. Instead, I provide Android and Linux prebuilt binaries which are available in the Releases tab on this repo. They're less buggy, faster, and platform native.
 
 Open the project dev shell and run
 
@@ -59,15 +59,15 @@ gtk4-broadwayd :5
 GDK_BACKEND=broadway BROADWAY_DISPLAY=:5 gtk4-demo
 ```
 
-By default the site will be visible at <http://127.0.0.1:8085>
+By default the site will be visible at <http://127.0.0.1:8085>.
 
 ## Tips
 
-Use your arrow keys. Press `ctrl + d` to delete a plan. Press `ctrl +n` (hotkey) to open the popup to create a new plan or list. This app is best used with the GTK4 Nord dark theme.
+Use your arrow keys. Press `ctrl + D` to delete a plan. Press `ctrl + N` (hotkey) to open the popup to create a new plan or list. This app is best used with the GTK4 Nord dark theme.
 
 ## Build
 
-I recommend using NixOS for the best development experience. If you want to build on a platform other than Nix, refer to the flake.nix for dependencies.
+I recommend using NixOS for the best development experience. If you want to build on a platform other than Nix, refer to the `flake.nix` for dependencies.
 
 Enter the Nix devshell: `nix develop`
 
@@ -79,7 +79,7 @@ Note that you must have Samba installed on your system if you want syncing to a 
 
 ## Build for Android
 
-Note that this is experimental and may crash!
+Note that Android builds are experimental and are more prone to crashes or bugs.
 
 This project uses Pixiewood for Android support. You must install Pixiewood from source:
 
@@ -134,7 +134,11 @@ cp .pixiewood/bin-aarch64/libplanning.so .pixiewood/android/app/src/main/jniLibs
 
 cp $ANDROID_NDK_ROOT/<your version number thing here>/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/x86_64-linux-android/libc++_shared.so .pixiewood/android/app/src/main/jniLibs/x86_64/
 cp $ANDROID_NDK_ROOT/<your version number thing here>/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/aarch64-linux-android/libc++_shared.so .pixiewood/android/app/src/main/jniLibs/arm64-v8a/
+
 # Then rebuild again
+perl /usr/opt/gtk-android-builder/pixiewood build
+
+# The android binaries will be in .pixiewood/android/app/build/
 ```
 
 If on NixOS, add `programs.nix-ld.enable = true;` to your config.
@@ -142,6 +146,8 @@ If on NixOS, add `programs.nix-ld.enable = true;` to your config.
 Note that the app dynamically adjusts its theme based on the Android dark mode setting. If you want dark mode, enable it in your Android settings!
 
 ### Android emulation
+
+If you're on Wayland, you will need to enable XWayland on your compositor for the emulator to run.
 
 ```bash
 avdmanager create avd -n planningDevice -k "system-images;android-34;google_apis;x86_64" --device "pixel"
@@ -151,5 +157,3 @@ emulator -avd planningDevice -cores 4 -memory 4096 -gpu swiftshader_indirect -no
 # In your IDE:
 adb install -r .pixiewood/android/app/build/outputs/apk/debug/app-x86_64-debug.apk && adb shell am start -n com.amazinaxel.planning/org.gtk.android.ToplevelActivity
 ```
-
-If you're on Wayland, you will need to enable XWayland for your compositor.
