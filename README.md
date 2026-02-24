@@ -23,6 +23,13 @@ environment.systemPackages = [ inputs.planning.packages.${system}.default ];
 
 And then rebuild. You can alternatively test out this program by running `nix shell github:AmazinAxel/Planning`
 
+## Some screenshots
+
+![Plan list page](media/listPage.png)
+![New plan popover](media/newPlan.png)
+![Plan page](media/planPage.png)
+![New list popover](media/newPlan.png)
+
 ## Sync with a Samba server
 
 This app can upload or download its data from any Samba share.
