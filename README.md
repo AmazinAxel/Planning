@@ -138,7 +138,8 @@ cp $ANDROID_NDK_ROOT/<your version number thing here>/toolchains/llvm/prebuilt/l
 # Then rebuild again
 perl /usr/opt/gtk-android-builder/pixiewood build
 
-# The android binaries will be in .pixiewood/android/app/build/
+# The android binaries will be in .pixiewood/android/app/build/outputs/apk/debug
+
 ```
 
 If on NixOS, add `programs.nix-ld.enable = true;` to your config.
