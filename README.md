@@ -28,7 +28,7 @@ And then rebuild. You can alternatively test out this program by running `nix sh
 ![Plan list page](media/listPage.png)
 ![New plan popover](media/newPlan.png)
 ![Plan page](media/planPage.png)
-![New list popover](media/newPlan.png)
+![New list popover](media/newList.png)
 
 ## Sync with a Samba server
 
