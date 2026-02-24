@@ -24,6 +24,7 @@ void renderLists(Gtk::Box* listsBox, json& appData, const std::string& planName)
         listsBox->remove(*child); // Removes all the old lists TODO replace this with something more modular so it doesnt revert positioning
 
     for (auto& plan: appData["plans"]) { // Loop all plans
+        if (!plan.contains(planName)) continue;
         auto& planData = plan[planName];
 
         // Loop all lists in plan
