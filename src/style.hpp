@@ -68,7 +68,6 @@ static const char CSS[] = R"CSS(
 		padding: 0.2rem;
 	}
 	.listSection * { border-radius: 0; }
-	.listSection { border-radius: 0.5rem; }
 
 	.planPage { background-color: var(--darkest1); }
 )CSS";

@@ -1,6 +1,7 @@
 #pragma once
 #include <gtkmm/application.h>
 #include <gtkmm/box.h>
+#include <gtkmm/menubutton.h>
 #include <gtkmm/stack.h>
 
 #include <nlohmann/json.hpp>
@@ -12,6 +13,7 @@ public:
     void refresh();
     json& appData;
     Gtk::Box* listBox = nullptr;
+    Gtk::MenuButton* addPlanBtn = nullptr;
     void addPlan(const std::string& name);
 };
 

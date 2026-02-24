@@ -41,6 +41,7 @@ Gtk::Box* planPage(Gtk::Stack* stack, json& appData, const Glib::ustring& planNa
     listsBox->set_margin_top(8);
     listsBox->set_margin_bottom(8);
     listsBox->set_spacing(20); // 20px gap between lists
+    listsBox->set_halign(Gtk::Align::CENTER);
 
     auto scroll = Gtk::make_managed<Gtk::ScrolledWindow>();
     scroll->set_child(*listsBox);
@@ -73,14 +74,21 @@ Gtk::Box* planPage(Gtk::Stack* stack, json& appData, const Glib::ustring& planNa
     // Escape and plan page deletion
     auto key = Gtk::EventControllerKey::create();
     planPage->add_controller(key);
-    key->signal_key_pressed().connect([stack, planName, &appData](guint keyval, guint keycode, Gdk::ModifierType state) {
+    key->signal_key_pressed().connect([stack, planName, &appData, addListBtn](guint keyval, guint keycode, Gdk::ModifierType state) {
         if (keyval == GDK_KEY_Escape) {
             stack->set_visible_child("list"); // Go back
             return true;
         };
 
-        // Delete current page
         bool ctrl = static_cast<bool>(state & Gdk::ModifierType::CONTROL_MASK); // is holding control
+
+        // Open add list button pop
+        if (ctrl && keyval == GDK_KEY_n) {
+            addListBtn->popup();
+            return true;
+        };
+
+        // Delete current page
         if (ctrl && keyval == GDK_KEY_d) {
             stack->set_visible_child("list"); // Go back
             deletePlanFromJSON(appData, planName);

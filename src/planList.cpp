@@ -1,6 +1,8 @@
 #include <gtkmm/button.h>
+#include <gtkmm/eventcontrollerkey.h>
 #include <gtkmm/label.h>
 #include <gtkmm/scrolledwindow.h>
+#include <gdk/gdkkeysyms.h>
 
 #include "app.hpp"
 #include "functionality/plans/plans.hpp"
@@ -32,6 +34,16 @@ PlanListPage::PlanListPage(json& data): Gtk::Box(Gtk::Orientation::VERTICAL), ap
     syncLabel->add_css_class("isSynced");
     append(*syncLabel);
 
+    // control + N to open add plan popover
+    auto key = Gtk::EventControllerKey::create();
+    add_controller(key);
+    key->signal_key_pressed().connect([this](guint keyval, guint, Gdk::ModifierType state) {
+        bool ctrl = static_cast<bool>(state & Gdk::ModifierType::CONTROL_MASK);
+        if (ctrl && keyval == GDK_KEY_n)
+            addPlanBtn->popup();
+        return false;
+    }, false);
+
     // Add all plans
     refresh();
 };
@@ -58,5 +70,6 @@ void PlanListPage::refresh() {
 
         listBox->append(*btn);
     };
-    listBox->append(*makePlanButton()); // Create new plan button
+    addPlanBtn = makePlanButton();
+    listBox->append(*addPlanBtn); // Create new plan button
 };

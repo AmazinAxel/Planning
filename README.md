@@ -38,7 +38,7 @@ Make sure you have Samba running and add these options to `~/.config/planning/da
 
 ## Broadway web test
 
-I've set up a demo server running Broadway so you can test out this app in your browser. Due to how Broadway functions, the app is windowed like a desktop so you'll need to fullscreen the app. It also has padding which messes with the background color of plan pages (this is not visible in the binary release of the app)
+I've set up a demo server running Broadway so you can test out this app in your browser. Due to how Broadway functions, the app is windowed like a desktop so you'll need to fullscreen the app.
 
 **The Broadway server is by no means a replacement of the actual application!** You should run the binary locally if you want your data to be saved. Anyone can edit or delete data in the Broadway session. There also seems to be some scrolling bugs and probably other issues which aren't present in the binary.
 
@@ -63,7 +63,7 @@ By default the site will be visible at <http://127.0.0.1:8085>
 
 ## Tips
 
-Use your arrow keys. Press `ctrl + d` to delete a plan. This app is best used with the GTK4 Nord dark theme.
+Use your arrow keys. Press `ctrl + d` to delete a plan. Press `ctrl +n` (hotkey) to open the popup to create a new plan or list. This app is best used with the GTK4 Nord dark theme.
 
 ## Build
 
