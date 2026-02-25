@@ -4,7 +4,7 @@
   outputs = { self, nixpkgs }:
     let
       system = "x86_64-linux"; # Can include other archs if needed
-      pkgs = import nixpkgs { inherit system; };
+      pkgs = nixpkgs.legacyPackages.${system};
     in {
       packages.${system} = {
         planning = pkgs.stdenv.mkDerivation {
