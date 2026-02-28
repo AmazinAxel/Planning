@@ -22,6 +22,16 @@ sources = files(
   './src/planPage.cpp',
 )
 
+install_data(
+  'planning.desktop',
+  install_dir: get_option('datadir') / 'applications'
+)
+
+install_data(
+  'planning.png',
+  install_dir: get_option('datadir') / 'icons' / 'hicolor' / '512x512' / 'apps'
+)
+
 executable(
   'planning',
   sources,
