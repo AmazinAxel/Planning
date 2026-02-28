@@ -1,4 +1,6 @@
 #include <gtkmm/applicationwindow.h>
+#include <glibmm/main.h>
+#include <thread>
 
 #include "app.hpp"
 #include "style.hpp"
@@ -37,6 +39,14 @@ void App::on_activate() {
         uploadDataToServer();
         return false; // Let window close
     }, false);
+
+    // On Broadway sync to file periodically
+    if (isOnBroadway()) {
+        Glib::signal_timeout().connect_seconds([]() {
+            std::thread(uploadDataToServer).detach();
+            return true;
+        }, 60);
+    };
 
     // For broadway auto fullscreen
     window->set_decorated(false);

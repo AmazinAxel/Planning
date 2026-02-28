@@ -7,7 +7,11 @@
 #include <nlohmann/json.hpp>
 using json = nlohmann::json;
 
-// If sync config is set, return it
+#include "utils.hpp"
+
+static const std::string BROADWAY_DATA_PATH = "/media/planningData.json";
+
+// If samba sync config is set, return it
 static bool getSyncConfig(json& config) {
     auto data_path = Glib::get_user_config_dir() + "/planning/data.json";
 
@@ -21,6 +25,13 @@ static bool getSyncConfig(json& config) {
 };
 
 bool downloadDataFromServer() {
+    auto local_path = Glib::get_user_config_dir() + "/planning/data.json";
+
+    if (isOnBroadway()) { // Get data locally since this is on broadway
+        Glib::file_set_contents(local_path, Glib::file_get_contents(BROADWAY_DATA_PATH));
+        return true;
+    };
+
     json config;
     if (!getSyncConfig(config)) return false;
 
@@ -30,13 +41,11 @@ bool downloadDataFromServer() {
     std::string password = config.value("password", "");
     std::string share    = config.value("smbshare", "");
 
-    auto data_path = Glib::get_user_config_dir() + "/planning/data.json";
-
     std::vector<std::string> argv = {
         "smbclient", "//" + server + "/" + share,
         "-U", user + "%" + password,
         "-W", group,
-        "-c", "get planningData.json " + data_path
+        "-c", "get planningData.json " + local_path
     };
 
     try {
@@ -55,6 +64,13 @@ bool downloadDataFromServer() {
 };
 
 void uploadDataToServer() {
+    auto local_path = Glib::get_user_config_dir() + "/planning/data.json";
+
+    if (isOnBroadway()) { // Save changes locally if on broadway
+        Glib::file_set_contents(BROADWAY_DATA_PATH, Glib::file_get_contents(local_path));
+        return;
+    };
+
     json config;
     if (!getSyncConfig(config)) return;
 
@@ -64,13 +80,11 @@ void uploadDataToServer() {
     std::string password = config.value("password", "");
     std::string share = config.value("smbshare", "");
 
-    auto data_path = Glib::get_user_config_dir() + "/planning/data.json";
-
     std::vector<std::string> argv = {
         "smbclient", "//" + server + "/" + share,
         "-U", user + "%" + password,
         "-W", group,
-        "-c", "put " + data_path + " planningData.json"
+        "-c", "put " + local_path + " planningData.json"
     };
 
     try {
