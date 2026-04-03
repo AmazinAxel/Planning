@@ -7,15 +7,34 @@
       allSystems = nixpkgs.lib.genAttrs systems;
     in {
       packages = allSystems (system:
-        let pkgs = nixpkgs.legacyPackages.${system}; in {
-          planning = pkgs.stdenv.mkDerivation {
+        let
+          makePlanning = { stdenv, buildPkgs, nativePkgs }: stdenv.mkDerivation {
             pname = "planning";
             version = "2.0.0";
             src = self;
-
-            nativeBuildInputs = with pkgs; [ meson ninja pkg-config wrapGAppsHook4 ];
-            buildInputs = with pkgs; [ gtkmm4 glibmm nlohmann_json ];
+            nativeBuildInputs = with nativePkgs; [
+              meson ninja pkg-config wrapGAppsHook4
+            ];
+            buildInputs = with buildPkgs; [
+              gtkmm4 glibmm nlohmann_json
+            ];
           };
+          pkgs = nixpkgs.legacyPackages.${system};
+
+        in {
+          planning = makePlanning { # native
+            stdenv = pkgs.stdenv;
+            buildPkgs = pkgs;
+            nativePkgs = pkgs;
+          };
+
+          planning-aarch64 = let # `nix build .#planning-aarch64`
+            cross = pkgs.pkgsCross.aarch64-multiplatform; # cross comp
+            in makePlanning {
+              stdenv = cross.stdenv;
+              buildPkgs = cross;
+              nativePkgs = pkgs;
+            };
           default = self.packages.${system}.planning;
         }
       );
@@ -30,7 +49,6 @@
               gcc
               pkg-config
               meson
-              ccache # caching
               ninja
             ];
           };
