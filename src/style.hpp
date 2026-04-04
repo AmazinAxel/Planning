@@ -78,7 +78,6 @@ static const char CSS[] = R"CSS(
 	label.dragHandle {
 		padding: 0 4px;
 		color: var(--darkest4);
-		cursor: grab;
 		font-size: 0.9rem;
 	}
 	label.dragHandle:hover { color: var(--lightest3); }

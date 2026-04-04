@@ -15,7 +15,7 @@
 #include <gtkmm/widgetpaintable.h>
 #include <gtkmm/dragsource.h>
 #include <gtkmm/gesturedrag.h>
-#include <gtk/gtk.h>
+#include <gtkmm/eventcontrollermotion.h>
 
 #include "../../app.hpp"
 #include "lists.hpp"
@@ -268,60 +268,51 @@ void renderLists(Gtk::Box* listsBox, json& appData, const std::string& planName)
             // Broadway drag fix
             if (isBroadway && !infos.empty()) {
                 auto infosShared = std::make_shared<std::vector<EntryInfo>>(infos);
-                auto pendingInsertAfterID = std::make_shared<int>(-2); // -2 = no pending move
+                auto pendingInsertAfterID = std::make_shared<int>(-2);
+                auto isDragging = std::make_shared<bool>(false);
+
+                auto motionCtrl = Gtk::EventControllerMotion::create();
+                motionCtrl->signal_motion().connect([isDragging, infosShared, sepEnd, showIndicator, pendingInsertAfterID](double, double y) {
+                    if (!*isDragging) return;
+                    *pendingInsertAfterID = (*infosShared).back().id;
+                    Gtk::Box* indicator = sepEnd;
+                    for (size_t j = 0; j < infosShared->size(); ++j) {
+                        auto& other = (*infosShared)[j];
+                        auto alloc = other.row->get_allocation();
+                        float rowMid = (float)alloc.get_y() + (float)alloc.get_height() / 2.0f;
+                        if ((float)y < rowMid) {
+                            *pendingInsertAfterID = other.prevID;
+                            indicator = other.sepAbove;
+                            break;
+                        }
+                        *pendingInsertAfterID = other.id;
+                        indicator = (j + 1 < infosShared->size()) ? (*infosShared)[j + 1].sepAbove : sepEnd;
+                    }
+                    showIndicator(indicator);
+                });
+                listSection->add_controller(motionCtrl);
 
                 for (size_t i = 0; i < infos.size(); ++i) {
                     EntryInfo info = infos[i];
-
                     if (!info.handle) continue;
 
                     auto gesture = Gtk::GestureDrag::create();
-                    auto startY = std::make_shared<double>(0.0);
 
-                    gesture->signal_drag_begin().connect([info, planName, listName, startY](double, double y) {
-                        *startY = y;
+                    gesture->signal_drag_begin().connect([info, planName, listName, isDragging](double, double) {
+                        *isDragging = true;
                         App::get()->dragPlanName = planName;
                         App::get()->dragListName = listName;
                         App::get()->dragEntryID = info.id;
                         info.row->set_opacity(0.5);
                     });
 
-                    gesture->signal_drag_update().connect([info, infosShared, sepEnd, showIndicator, listSection, startY, pendingInsertAfterID](double, double dy) {
-                        // Convert cursor position from info.handle coords to listSection coords
-                        graphene_point_t pt = { 0.0f, (float)(*startY + dy) };
-                        graphene_point_t absPos;
-                        if (!gtk_widget_compute_point(GTK_WIDGET(info.handle->gobj()), GTK_WIDGET(listSection->gobj()), &pt, &absPos)) return;
-                        float absY = absPos.y;
-
-                        // Default: insert at end of list
-                        *pendingInsertAfterID = (*infosShared).back().id;
-                        Gtk::Box* indicator = sepEnd;
-
-                        for (size_t j = 0; j < infosShared->size(); ++j) {
-                            auto& other = (*infosShared)[j];
-                            graphene_point_t rowOrigin = { 0, 0 };
-                            graphene_point_t rowPos;
-                            if (!gtk_widget_compute_point(GTK_WIDGET(other.row->gobj()), GTK_WIDGET(listSection->gobj()), &rowOrigin, &rowPos)) continue;
-                            float rowMid = rowPos.y + (float)other.row->get_height() / 2.0f;
-
-                            if (absY < rowMid) {
-                                *pendingInsertAfterID = other.prevID;
-                                indicator = other.sepAbove;
-                                break;
-                            }
-                            // absY is past this row's midpoint — tentatively insert after it
-                            *pendingInsertAfterID = other.id;
-                            indicator = (j + 1 < infosShared->size()) ? (*infosShared)[j + 1].sepAbove : sepEnd;
-                        }
-                        showIndicator(indicator);
-                    });
-
-                    gesture->signal_drag_end().connect([info, pendingInsertAfterID, showIndicator, planName, listName, &appData](double, double) {
+                    gesture->signal_drag_end().connect([info, isDragging, pendingInsertAfterID, showIndicator, planName, listName, &appData](double, double) {
                         info.row->set_opacity(1.0);
                         showIndicator(nullptr);
+                        if (!*isDragging) return;
+                        *isDragging = false;
                         int insertAfterID = *pendingInsertAfterID;
                         *pendingInsertAfterID = -2;
-                        // Skip if cancelled, or item is already in that position
                         if (insertAfterID == -2 || insertAfterID == info.prevID || insertAfterID == info.id) return;
                         std::string srcPlan = App::get()->dragPlanName;
                         std::string srcList = App::get()->dragListName;
