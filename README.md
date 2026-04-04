@@ -153,9 +153,11 @@ If on NixOS, add `programs.nix-ld.enable = true;` to your config.
 
 Note that the app dynamically adjusts its theme based on the Android dark mode setting. If you want dark mode, enable it in your Android settings!
 
+<!--
 ## Deploy to a raspberry pi
 
 My [homelab repository](https://github.com/amazinaxel/homelab) has a service which runs this app through Broadway. It allows anyone on the network to use this app (on non-native devices as well) through the use of a web browser. Use `sudo nix build .#planning --system aarch64-linux` and then `scp result/bin/planning alec@alechomelab.local:/home/alec/` to deploy it.
+-->
 
 ### Android emulation
 

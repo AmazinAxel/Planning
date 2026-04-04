@@ -15,7 +15,6 @@
 #include <gtkmm/widgetpaintable.h>
 #include <gtkmm/dragsource.h>
 #include <gtkmm/gesturedrag.h>
-#include <gdkmm/display.h>
 #include <gtk/gtk.h>
 
 #include "../../app.hpp"
@@ -26,7 +25,8 @@ void renderLists(Gtk::Box* listsBox, json& appData, const std::string& planName)
     while (auto child = listsBox->get_first_child())
         listsBox->remove(*child); // Removes all the old lists TODO replace this with something more modular so it doesnt revert positioning
 
-    bool isBroadway = (g_strcmp0(G_OBJECT_TYPE_NAME(gdk_display_get_default()), "GdkBroadwayDisplay") == 0);
+    // Broadway backend doesn't support drag surfaces and will crash if DragSource is used
+    bool isBroadway = isOnBroadway();
 
     for (auto& plan: appData["plans"]) { // Loop all plans
         if (!plan.contains(planName)) continue;

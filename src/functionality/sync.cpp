@@ -28,7 +28,14 @@ bool downloadDataFromServer() {
     auto local_path = Glib::get_user_config_dir() + "/planning/data.json";
 
     if (isOnBroadway()) { // Get data locally since this is on broadway
-        Glib::file_set_contents(local_path, Glib::file_get_contents(BROADWAY_DATA_PATH));
+        if (!Glib::file_test(BROADWAY_DATA_PATH, Glib::FileTest::EXISTS))
+            return false; // No data yet?
+        try {
+            Glib::file_set_contents(local_path, Glib::file_get_contents(BROADWAY_DATA_PATH));
+        } catch (const Glib::Error& e) {
+            std::cerr << "Broadway data read error: " << e.what() << std::endl;
+            return false;
+        };
         return true;
     };
 
