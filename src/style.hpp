@@ -75,5 +75,13 @@ static const char CSS[] = R"CSS(
 
 	.dropIndicator { background-color: var(--blue2); min-height: 3px; }
 
+	label.dragHandle {
+		padding: 0 4px;
+		color: var(--darkest4);
+		cursor: grab;
+		font-size: 0.9rem;
+	}
+	label.dragHandle:hover { color: var(--lightest3); }
+
 	.planPage { background-color: var(--darkest1); }
 )CSS";
