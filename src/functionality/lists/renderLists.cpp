@@ -16,6 +16,8 @@
 #include <gtkmm/dragsource.h>
 #include <gtkmm/gesturedrag.h>
 #include <gtkmm/eventcontrollermotion.h>
+#include <gtkmm/eventcontrollerlegacy.h>
+#include <gdk/gdkevents.h>
 
 #include "../../app.hpp"
 #include "lists.hpp"
@@ -27,6 +29,7 @@ void renderLists(Gtk::Box* listsBox, json& appData, const std::string& planName)
 
     // Broadway backend doesn't support drag surfaces and will crash if DragSource is used
     bool isBroadway = isOnBroadway();
+    auto broadwayDragging = std::make_shared<bool>(false);
 
     for (auto& plan: appData["plans"]) { // Loop all plans
         if (!plan.contains(planName)) continue;
@@ -269,11 +272,38 @@ void renderLists(Gtk::Box* listsBox, json& appData, const std::string& planName)
             if (isBroadway && !infos.empty()) {
                 auto infosShared = std::make_shared<std::vector<EntryInfo>>(infos);
                 auto pendingInsertAfterID = std::make_shared<int>(-2);
-                auto isDragging = std::make_shared<bool>(false);
 
+                auto doMove = std::make_shared<std::function<void()>>(
+                    [broadwayDragging, pendingInsertAfterID, showIndicator, infosShared, planName, listName, &appData]() {
+                        if (!*broadwayDragging) return;
+                        *broadwayDragging = false;
+                        showIndicator(nullptr);
+                        for (auto& i : *infosShared) i.row->set_opacity(1.0);
+                        int insertAfterID = *pendingInsertAfterID;
+                        *pendingInsertAfterID = -2;
+                        if (insertAfterID == -2) return;
+                        int srcID = App::get()->dragEntryID;
+                        if (srcID == -1) return;
+                        if (insertAfterID == srcID) return;
+                        std::string srcPlan = App::get()->dragPlanName;
+                        std::string srcList = App::get()->dragListName;
+
+                        if (srcPlan == planName && srcList == listName) {
+                            for (auto& i : *infosShared)
+                                if (i.id == srcID && insertAfterID == i.prevID) return;
+                        }
+                        Glib::signal_idle().connect_once([srcPlan, srcList, srcID, planName, listName, insertAfterID, &appData]() {
+                            moveEntryJSON(appData, srcPlan, srcList, srcID, planName, listName, insertAfterID);
+                            saveJSON(appData);
+                            App::get()->openPlan(planName, listName);
+                        });
+                    }
+                );
+
+                // Motion tracking
                 auto motionCtrl = Gtk::EventControllerMotion::create();
-                motionCtrl->signal_motion().connect([isDragging, infosShared, sepEnd, showIndicator, pendingInsertAfterID](double, double y) {
-                    if (!*isDragging) return;
+                motionCtrl->signal_motion().connect([broadwayDragging, infosShared, sepEnd, showIndicator, pendingInsertAfterID](double, double y) {
+                    if (!*broadwayDragging) return;
                     *pendingInsertAfterID = (*infosShared).back().id;
                     Gtk::Box* indicator = sepEnd;
                     for (size_t j = 0; j < infosShared->size(); ++j) {
@@ -290,40 +320,36 @@ void renderLists(Gtk::Box* listsBox, json& appData, const std::string& planName)
                     }
                     showIndicator(indicator);
                 });
+
+                motionCtrl->signal_leave().connect([broadwayDragging, showIndicator]() {
+                    if (*broadwayDragging) showIndicator(nullptr);
+                });
                 listSection->add_controller(motionCtrl);
+
+                auto releaseCtrl = Gtk::EventControllerLegacy::create();
+                releaseCtrl->set_propagation_phase(Gtk::PropagationPhase::BUBBLE);
+                releaseCtrl->signal_event().connect([broadwayDragging, doMove](const Glib::RefPtr<const Gdk::Event>& event) -> bool {
+                    if (*broadwayDragging && gdk_event_get_event_type(const_cast<GdkEvent*>(event->gobj())) == GDK_BUTTON_RELEASE)
+                        (*doMove)();
+                    return false; // just observe
+                }, false);
+                listSection->add_controller(releaseCtrl);
 
                 for (size_t i = 0; i < infos.size(); ++i) {
                     EntryInfo info = infos[i];
                     if (!info.handle) continue;
 
                     auto gesture = Gtk::GestureDrag::create();
-
-                    gesture->signal_drag_begin().connect([info, planName, listName, isDragging](double, double) {
-                        *isDragging = true;
+                    gesture->signal_drag_begin().connect([info, planName, listName, broadwayDragging](double, double) {
+                        *broadwayDragging = true;
                         App::get()->dragPlanName = planName;
                         App::get()->dragListName = listName;
                         App::get()->dragEntryID = info.id;
                         info.row->set_opacity(0.5);
                     });
-
-                    gesture->signal_drag_end().connect([info, isDragging, pendingInsertAfterID, showIndicator, planName, listName, &appData](double, double) {
-                        info.row->set_opacity(1.0);
-                        showIndicator(nullptr);
-                        if (!*isDragging) return;
-                        *isDragging = false;
-                        int insertAfterID = *pendingInsertAfterID;
-                        *pendingInsertAfterID = -2;
-                        if (insertAfterID == -2 || insertAfterID == info.prevID || insertAfterID == info.id) return;
-                        std::string srcPlan = App::get()->dragPlanName;
-                        std::string srcList = App::get()->dragListName;
-                        int srcID = App::get()->dragEntryID;
-                        Glib::signal_idle().connect_once([srcPlan, srcList, srcID, planName, listName, insertAfterID, &appData]() {
-                            moveEntryJSON(appData, srcPlan, srcList, srcID, planName, listName, insertAfterID);
-                            saveJSON(appData);
-                            App::get()->openPlan(planName, listName);
-                        });
+                    gesture->signal_drag_end().connect([doMove](double, double) {
+                        (*doMove)();
                     });
-
                     info.handle->add_controller(gesture);
                 }
             }
