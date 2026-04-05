@@ -10,6 +10,7 @@ using json = nlohmann::json;
 #include "utils.hpp"
 
 static const std::string BROADWAY_DATA_PATH = "/media/planningData.json";
+static const std::string SAMBA_TEMP_PATH = "/tmp/planning_sync_tmp.json";
 
 // If samba sync config is set, return it
 static bool getSyncConfig(json& config) {
@@ -24,6 +25,16 @@ static bool getSyncConfig(json& config) {
     return config.contains("smbserver");
 };
 
+static long long getLastSaved(const std::string& path) {
+    if (!Glib::file_test(path, Glib::FileTest::EXISTS)) return 0;
+    try {
+        json data = json::parse(Glib::file_get_contents(path), nullptr, false);
+        if (!data.is_discarded() && data.contains("lastSaved"))
+            return data["lastSaved"].get<long long>();
+    } catch (...) {}
+    return 0;
+};
+
 bool downloadDataFromServer() {
     auto local_path = Glib::get_user_config_dir() + "/planning/data.json";
 
@@ -31,9 +42,17 @@ bool downloadDataFromServer() {
         if (!Glib::file_test(BROADWAY_DATA_PATH, Glib::FileTest::EXISTS))
             return false; // No data yet?
         try {
-            Glib::file_set_contents(local_path, Glib::file_get_contents(BROADWAY_DATA_PATH));
+            long long localTs = getLastSaved(local_path);
+            long long serverTs = getLastSaved(BROADWAY_DATA_PATH);
+            if (localTs > serverTs) {
+                // Local is newer!
+                Glib::file_set_contents(BROADWAY_DATA_PATH, Glib::file_get_contents(local_path));
+            } else {
+                // Server is newer
+                Glib::file_set_contents(local_path, Glib::file_get_contents(BROADWAY_DATA_PATH));
+            }
         } catch (const Glib::Error& e) {
-            std::cerr << "Broadway data read error: " << e.what() << std::endl;
+            std::cerr << "Broadway data sync error: " << e.what() << std::endl;
             return false;
         };
         return true;
@@ -52,7 +71,7 @@ bool downloadDataFromServer() {
         "smbclient", "//" + server + "/" + share,
         "-U", user + "%" + password,
         "-W", group,
-        "-c", "get planningData.json " + local_path
+        "-c", "get planningData.json " + SAMBA_TEMP_PATH
     };
 
     try {
@@ -67,6 +86,25 @@ bool downloadDataFromServer() {
         std::cerr << "Download from server error: " << err.what() << std::endl;
         return false;
     };
+
+    // Compare timestamps
+    long long localTs = getLastSaved(local_path);
+    long long serverTs = getLastSaved(SAMBA_TEMP_PATH);
+
+    if (localTs > serverTs) {
+        // Local is newer
+        Glib::file_set_contents(SAMBA_TEMP_PATH, ""); // clean up temp
+        uploadDataToServer();
+        return true;
+    }
+
+    // Server is newer
+    try {
+        Glib::file_set_contents(local_path, Glib::file_get_contents(SAMBA_TEMP_PATH));
+    } catch (const Glib::Error& e) {
+        std::cerr << "Failed to apply downloaded data: " << e.what() << std::endl;
+        return false;
+    }
     return true;
 };
 

@@ -2,6 +2,7 @@
 #include <gtkmm/entry.h>
 #include <gtkmm/menubutton.h>
 #include <gtkmm/popover.h>
+#include <algorithm>
 
 #include "../../app.hpp"
 #include "../utils.hpp"
@@ -14,7 +15,7 @@ static json* findPlan(json& data, const std::string& planName) {
     return nullptr;
 };
 
-static int nextEntryId(const json& entries) {
+int nextEntryId(const json& entries) {
     int maxId = 0;
     for (auto& e: entries) {
         int id = e["id"].get<int>();
@@ -32,6 +33,12 @@ int addListToPlanJSON(json& data, const std::string& planName, const std::string
     auto& entries = (*plan)[listName]["entries"];
     int id = nextEntryId(entries);
     entries.push_back({{"id", id}, {"value", ""}});
+
+    // display order
+    if (!plan->contains("_order"))
+        (*plan)["_order"] = json::array();
+    (*plan)["_order"].push_back(listName);
+
     return id;
 };
 
@@ -53,6 +60,13 @@ int addEntryToListJSON(json& data, const std::string& planName, const std::strin
 void deleteListFromPlanJSON(json& data, const std::string& planName, const std::string& listName) {
     auto* plan = findPlan(data, planName);
     plan->erase(listName);
+
+    // Remove from display order
+    if (plan->contains("_order")) {
+        auto& order = (*plan)["_order"];
+        order.erase(std::remove_if(order.begin(), order.end(),
+            [&listName](const json& n) { return n.get<std::string>() == listName; }), order.end());
+    }
 };
 
 void deleteEntryFromListJSON(json& data, const std::string& planName, const std::string& listName, int entryId) {
@@ -83,6 +97,20 @@ void setEntryIndentInListJSON(json& data, const std::string& planName, const std
             return;
         };
     };
+};
+
+void ensureListNotEmpty(json& data, const std::string& planName, const std::string& listName) {
+    auto* plan = findPlan(data, planName);
+    if (!plan || !plan->contains(listName)) return;
+    auto& entries = (*plan)[listName]["entries"];
+    if (entries.empty())
+        entries.push_back({{"id", nextEntryId(entries)}, {"value", ""}});
+};
+
+void reorderListsInJSON(json& data, const std::string& planName, const std::vector<std::string>& newOrder) {
+    auto* plan = findPlan(data, planName);
+    if (!plan) return;
+    (*plan)["_order"] = newOrder;
 };
 
 // For dragging

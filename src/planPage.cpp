@@ -63,8 +63,8 @@ Gtk::Box* planPage(Gtk::Stack* stack, json& appData, const Glib::ustring& planNa
     scroll->add_controller(drag);
 
     // Add list button (in header)
-    auto addListBtn = makeListButton(planName, [planName]() {
-        App::get()->openPlan(planName);
+    auto addListBtn = makeListButton(planName, []() {
+        App::get()->refreshCurrentPlan();
     });
     header->append(*addListBtn);
 
@@ -99,6 +99,9 @@ Gtk::Box* planPage(Gtk::Stack* stack, json& appData, const Glib::ustring& planNa
 
         return false;
     }, false);
+
+    App::get()->currentListsBox = listsBox;
+    App::get()->currentPlanName = std::string(planName);
 
     renderLists(listsBox, appData, planName);
 

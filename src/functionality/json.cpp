@@ -1,9 +1,12 @@
 #include <giomm/file.h>
 #include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>
+#include <ctime>
 
 #include <nlohmann/json.hpp>
 using json = nlohmann::json;
+
+#include "utils.hpp"
 
 json initLoadJSON() {
     auto config_dir = Glib::get_user_config_dir() + "/planning";
@@ -25,7 +28,11 @@ json initLoadJSON() {
     return json::parse(contents);
 };
 
-void saveJSON(const json& json) {
+void saveJSON(const json& data) {
+    json toWrite = data;
+    toWrite["lastSaved"] = static_cast<long long>(time(nullptr));
     auto path = Glib::get_user_config_dir() + "/planning/data.json";
-    Glib::file_set_contents(path, json.dump(4));
+    Glib::file_set_contents(path, toWrite.dump(4));
+    if (isOnBroadway())
+        uploadDataToServer();
 };

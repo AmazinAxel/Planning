@@ -11,6 +11,7 @@
 #include <gdk/gdkcontentprovider.h>
 #include <memory>
 #include <vector>
+#include <algorithm>
 #include <gdk/gdkkeysyms.h>
 #include <gtkmm/widgetpaintable.h>
 #include <gtkmm/dragsource.h>
@@ -25,20 +26,39 @@
 
 void renderLists(Gtk::Box* listsBox, json& appData, const std::string& planName) {
     while (auto child = listsBox->get_first_child())
-        listsBox->remove(*child); // Removes all the old lists TODO replace this with something more modular so it doesnt revert positioning
+        listsBox->remove(*child); // Removes all the old lists
 
     // Broadway backend doesn't support drag surfaces and will crash if DragSource is used
     bool isBroadway = isOnBroadway();
     auto broadwayDragging = std::make_shared<bool>(false);
 
+    std::vector<std::string> listNames;
+    for (auto& plan: appData["plans"]) {
+        if (!plan.contains(planName)) continue;
+        auto& planData = plan[planName];
+        if (planData.contains("_order")) {
+            for (auto& n : planData["_order"])
+                listNames.push_back(n.get<std::string>());
+            // Migration: include any lists missing from _order
+            for (auto it = planData.begin(); it != planData.end(); ++it)
+                if (it.key() != "_order" &&
+                    std::find(listNames.begin(), listNames.end(), it.key()) == listNames.end())
+                    listNames.push_back(it.key());
+        } else {
+            for (auto it = planData.begin(); it != planData.end(); ++it)
+                listNames.push_back(it.key());
+        }
+        break;
+    }
+
     for (auto& plan: appData["plans"]) { // Loop all plans
         if (!plan.contains(planName)) continue;
         auto& planData = plan[planName];
 
-        // Loop all lists in plan
-        for (auto it = planData.begin(); it != planData.end(); ++it) {
-            std::string listName = it.key();
-            auto& list = it.value();
+        // Loop all lists in display order
+        for (const auto& listName : listNames) {
+            if (!planData.contains(listName)) continue;
+            auto& list = planData[listName];
 
             auto listSection = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::VERTICAL);
             listSection->set_size_request(300, -1);
@@ -63,7 +83,7 @@ void renderLists(Gtk::Box* listsBox, json& appData, const std::string& planName)
                 Gtk::Box* row;
                 Gtk::Box* sepAbove;
                 Gtk::Entry* edit;
-                Gtk::Label* handle; // Broadway drag handle 
+                Gtk::Label* handle; // Broadway drag handle
             };
             std::vector<EntryInfo> infos;
             int prevID = -1;
@@ -107,14 +127,14 @@ void renderLists(Gtk::Box* listsBox, json& appData, const std::string& planName)
                         if (newVal.empty()) { // Don't make new entry if the current one is empty
                             deleteEntryFromListJSON(appData, planName, listName, entryID);
                             saveJSON(appData);
-                            App::get()->openPlan(planName, listName);
+                            App::get()->refreshCurrentPlan(listName);
                             return;
                         };
                         editEntryInListJSON(appData, planName, listName, entryID, newVal);
                         int newID = addEntryToListJSON(appData, planName, listName, entryID);
                         saveJSON(appData);
                         App::get()->focusedEntryID = newID;
-                        App::get()->openPlan(planName, listName);
+                        App::get()->refreshCurrentPlan(listName);
                     });
                 });
 
@@ -142,7 +162,7 @@ void renderLists(Gtk::Box* listsBox, json& appData, const std::string& planName)
                         App::get()->focusedEntryID = entryID;
                         *handled = true;
                         Glib::signal_idle().connect_once([&appData, planName, listName]() {
-                            App::get()->openPlan(planName, listName);
+                            App::get()->refreshCurrentPlan(listName);
                         });
                         return true;
                     };
@@ -167,14 +187,14 @@ void renderLists(Gtk::Box* listsBox, json& appData, const std::string& planName)
                             deleteListFromPlanJSON(appData, planName, listName);
                             saveJSON(appData);
                             Glib::signal_idle().connect_once([planName]() {
-                                App::get()->openPlan(planName);
+                                App::get()->refreshCurrentPlan();
                             });
                         } else { // Prev or next entry
                             deleteEntryFromListJSON(appData, planName, listName, entryID);
                             saveJSON(appData);
                             App::get()->focusedEntryID = (prevID != -1) ? prevID : nextID;
                             Glib::signal_idle().connect_once([planName, listName]() {
-                                App::get()->openPlan(planName, listName);
+                                App::get()->refreshCurrentPlan(listName);
                             });
                         };
                         return true;
@@ -256,11 +276,13 @@ void renderLists(Gtk::Box* listsBox, json& appData, const std::string& planName)
                         int srcID = App::get()->dragEntryID;
                         if (srcID == info.id) return false;
                         int insertAfterID = (y < info.row->get_height() / 2.0) ? info.prevID : info.id;
-                        Glib::signal_idle().connect_once([planName, listName, srcID, insertAfterID, &appData]() {
-                            moveEntryJSON(appData, App::get()->dragPlanName, App::get()->dragListName, srcID,
-                                          planName, listName, insertAfterID);
+                        std::string srcPlan = App::get()->dragPlanName;
+                        std::string srcList = App::get()->dragListName;
+                        Glib::signal_idle().connect_once([planName, listName, srcPlan, srcList, srcID, insertAfterID, &appData]() {
+                            moveEntryJSON(appData, srcPlan, srcList, srcID, planName, listName, insertAfterID);
+                            ensureListNotEmpty(appData, srcPlan, srcList);
                             saveJSON(appData);
-                            App::get()->openPlan(planName, listName);
+                            App::get()->refreshCurrentPlan(listName);
                         });
                         return true;
                     }, false);
@@ -294,8 +316,9 @@ void renderLists(Gtk::Box* listsBox, json& appData, const std::string& planName)
                         }
                         Glib::signal_idle().connect_once([srcPlan, srcList, srcID, planName, listName, insertAfterID, &appData]() {
                             moveEntryJSON(appData, srcPlan, srcList, srcID, planName, listName, insertAfterID);
+                            ensureListNotEmpty(appData, srcPlan, srcList);
                             saveJSON(appData);
-                            App::get()->openPlan(planName, listName);
+                            App::get()->refreshCurrentPlan(listName);
                         });
                     }
                 );
@@ -326,10 +349,12 @@ void renderLists(Gtk::Box* listsBox, json& appData, const std::string& planName)
                 });
                 listSection->add_controller(motionCtrl);
 
+                // Release handler
                 auto releaseCtrl = Gtk::EventControllerLegacy::create();
                 releaseCtrl->set_propagation_phase(Gtk::PropagationPhase::BUBBLE);
                 releaseCtrl->signal_event().connect([broadwayDragging, doMove](const Glib::RefPtr<const Gdk::Event>& event) -> bool {
-                    if (*broadwayDragging && gdk_event_get_event_type(const_cast<GdkEvent*>(event->gobj())) == GDK_BUTTON_RELEASE)
+                    auto type = gdk_event_get_event_type(const_cast<GdkEvent*>(event->gobj()));
+                    if (*broadwayDragging && (type == GDK_BUTTON_RELEASE || type == GDK_TOUCH_END))
                         (*doMove)();
                     return false; // just observe
                 }, false);
@@ -352,6 +377,32 @@ void renderLists(Gtk::Box* listsBox, json& appData, const std::string& planName)
                     });
                     info.handle->add_controller(gesture);
                 }
+            }
+
+            // List header drag to reorder
+            {
+                auto listNamesCapture = listNames;
+                auto listDrag = Gtk::GestureDrag::create();
+                listDrag->signal_drag_update().connect([listSection](double dx, double) {
+                    listSection->set_opacity(std::abs(dx) > 100 ? 0.6 : 1.0);
+                });
+                listDrag->signal_drag_end().connect([&appData, planName, listName, listSection, listNamesCapture](double dx, double) mutable {
+                    listSection->set_opacity(1.0);
+                    if (std::abs(dx) < 100) return;
+                    auto names = listNamesCapture;
+                    auto it = std::find(names.begin(), names.end(), listName);
+                    if (it == names.end()) return;
+                    size_t idx = static_cast<size_t>(it - names.begin());
+                    if (dx < 0 && idx > 0)
+                        std::swap(names[idx], names[idx - 1]);
+                    else if (dx > 0 && idx + 1 < names.size())
+                        std::swap(names[idx], names[idx + 1]);
+                    else return;
+                    reorderListsInJSON(appData, planName, names);
+                    saveJSON(appData);
+                    App::get()->refreshCurrentPlan();
+                });
+                listTitle->add_controller(listDrag);
             }
 
             listsBox->append(*listSection);

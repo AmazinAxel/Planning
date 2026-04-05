@@ -30,8 +30,12 @@ public:
     std::string dragPlanName;
     std::string dragListName;
     int dragEntryID = -1;
+    Gtk::Box* currentListsBox = nullptr;
+    std::string currentPlanName;
     void openPlan(const Glib::ustring& name, const std::string& focusedList = "");
+    void refreshCurrentPlan(const std::string& focusedList = "");
     void on_activate() override;
 };
 
 Gtk::Box* planPage(Gtk::Stack* stack, json& appData, const Glib::ustring& planName);
+void renderLists(Gtk::Box* listsBox, json& appData, const std::string& planName);

@@ -1,6 +1,7 @@
 #include <gtkmm/applicationwindow.h>
 #include <glibmm/main.h>
 #include <thread>
+#include <chrono>
 
 #include "app.hpp"
 #include "style.hpp"
@@ -29,10 +30,16 @@ void App::on_activate() {
     stack->set_transition_type(Gtk::StackTransitionType::OVER_LEFT_RIGHT);
     stack->set_transition_duration(250);
 
+    // Disable laggy animations on broadway
+    if (isOnBroadway()) {
+        stack->set_transition_type(Gtk::StackTransitionType::NONE);
+        stack->set_transition_duration(0);
+    }
+
     listPage = Gtk::make_managed<PlanListPage>(appData);
     stack->add(*listPage, "list", "List");
 
-    stack->set_visible_child("list"); // inital page
+    stack->set_visible_child("list"); // initial page
     window->set_child(*stack);
 
     window->signal_close_request().connect([this]() {
@@ -40,29 +47,51 @@ void App::on_activate() {
         return false; // Let window close
     }, false);
 
-    // On Broadway sync to file periodically
-    if (isOnBroadway()) {
-        Glib::signal_timeout().connect_seconds([]() {
-            std::thread(uploadDataToServer).detach();
-            return true;
-        }, 60);
-    };
-
-    // For broadway auto fullscreen
     window->set_decorated(false);
-    window->maximize();
-    //window->fullscreen();
+    if (isOnBroadway()) {
+        window->set_default_size(700, 400);
+
+        // Broadway tab open/close
+        auto lastInactiveTime = std::make_shared<std::chrono::steady_clock::time_point>(std::chrono::steady_clock::now());
+        auto skipFirst = std::make_shared<bool>(true);
+        window->property_is_active().signal_changed().connect([window, lastInactiveTime, skipFirst]() {
+            if (window->property_is_active().get_value()) {
+                if (*skipFirst) { *skipFirst = false; return; } // ignore app-start activation
+                auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(
+                    std::chrono::steady_clock::now() - *lastInactiveTime).count();
+                if (elapsed >= 30) {
+                    // open
+                    downloadDataFromServer();
+                    App::get()->appData = initLoadJSON();
+                    App::get()->stack->set_visible_child("list");
+                    App::get()->listPage->refresh();
+                }
+            } else {
+                *lastInactiveTime = std::chrono::steady_clock::now();
+                std::thread(uploadDataToServer).detach();
+            }
+        });
+    } else {
+        window->maximize();
+    }
 
     window->present();
 };
 
-void App::openPlan(const Glib::ustring& planName, const std::string& focusedList) {
-    this->focusedList = focusedList;
+void App::openPlan(const Glib::ustring& planName, const std::string& fl) {
+    focusedList = fl;
     if (auto lastStack = stack->get_child_by_name("plan"))
         stack->remove(*lastStack); // Remove previous stack
 
-    stack->add(*planPage(stack, appData, planName), "plan", "Plan");
+    auto* page = planPage(stack, appData, planName);
+    stack->add(*page, "plan", "Plan");
     stack->set_visible_child("plan");
+};
+
+void App::refreshCurrentPlan(const std::string& fl) {
+    focusedList = fl;
+    if (currentListsBox)
+        renderLists(currentListsBox, appData, currentPlanName);
 };
 
 int main(int argc, char** argv, char**) {
