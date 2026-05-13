@@ -9,7 +9,6 @@ using json = nlohmann::json;
 
 #include "utils.hpp"
 
-static const std::string BROADWAY_DATA_PATH = "/media/planningData.json";
 static const std::string SAMBA_TEMP_PATH = "/tmp/planning_sync_tmp.json";
 
 // If samba sync config is set, return it
@@ -37,26 +36,6 @@ static long long getLastSaved(const std::string& path) {
 
 bool downloadDataFromServer() {
     auto local_path = Glib::get_user_config_dir() + "/planning/data.json";
-
-    if (isOnBroadway()) { // Get data locally since this is on broadway
-        if (!Glib::file_test(BROADWAY_DATA_PATH, Glib::FileTest::EXISTS))
-            return false; // No data yet?
-        try {
-            long long localTs = getLastSaved(local_path);
-            long long serverTs = getLastSaved(BROADWAY_DATA_PATH);
-            if (localTs > serverTs) {
-                // Local is newer!
-                Glib::file_set_contents(BROADWAY_DATA_PATH, Glib::file_get_contents(local_path));
-            } else {
-                // Server is newer
-                Glib::file_set_contents(local_path, Glib::file_get_contents(BROADWAY_DATA_PATH));
-            }
-        } catch (const Glib::Error& e) {
-            std::cerr << "Broadway data sync error: " << e.what() << std::endl;
-            return false;
-        };
-        return true;
-    };
 
     json config;
     if (!getSyncConfig(config)) return false;
@@ -110,12 +89,6 @@ bool downloadDataFromServer() {
 
 void uploadDataToServer() {
     auto local_path = Glib::get_user_config_dir() + "/planning/data.json";
-
-    if (isOnBroadway()) { // Save changes locally if on broadway
-        Glib::file_set_contents(BROADWAY_DATA_PATH, Glib::file_get_contents(local_path));
-        return;
-    };
-
     json config;
     if (!getSyncConfig(config)) return;
 

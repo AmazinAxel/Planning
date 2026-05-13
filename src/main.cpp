@@ -30,12 +30,6 @@ void App::on_activate() {
     stack->set_transition_type(Gtk::StackTransitionType::OVER_LEFT_RIGHT);
     stack->set_transition_duration(250);
 
-    // Disable laggy animations on broadway
-    if (isOnBroadway()) {
-        stack->set_transition_type(Gtk::StackTransitionType::NONE);
-        stack->set_transition_duration(0);
-    }
-
     listPage = Gtk::make_managed<PlanListPage>(appData);
     stack->add(*listPage, "list", "List");
 
@@ -48,32 +42,7 @@ void App::on_activate() {
     }, false);
 
     window->set_decorated(false);
-    if (isOnBroadway()) {
-        window->set_default_size(700, 400);
-
-        // Broadway tab open/close
-        auto lastInactiveTime = std::make_shared<std::chrono::steady_clock::time_point>(std::chrono::steady_clock::now());
-        auto skipFirst = std::make_shared<bool>(true);
-        window->property_is_active().signal_changed().connect([window, lastInactiveTime, skipFirst]() {
-            if (window->property_is_active().get_value()) {
-                if (*skipFirst) { *skipFirst = false; return; } // ignore app-start activation
-                auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(
-                    std::chrono::steady_clock::now() - *lastInactiveTime).count();
-                if (elapsed >= 30) {
-                    // open
-                    downloadDataFromServer();
-                    App::get()->appData = initLoadJSON();
-                    App::get()->stack->set_visible_child("list");
-                    App::get()->listPage->refresh();
-                }
-            } else {
-                *lastInactiveTime = std::chrono::steady_clock::now();
-                std::thread(uploadDataToServer).detach();
-            }
-        });
-    } else {
-        window->maximize();
-    }
+    window->maximize();
 
     window->present();
 };

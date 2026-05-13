@@ -28,10 +28,6 @@ void renderLists(Gtk::Box* listsBox, json& appData, const std::string& planName)
     while (auto child = listsBox->get_first_child())
         listsBox->remove(*child); // Removes all the old lists
 
-    // Broadway backend doesn't support drag surfaces and will crash if DragSource is used
-    bool isBroadway = isOnBroadway();
-    auto broadwayDragging = std::make_shared<bool>(false);
-
     std::vector<std::string> listNames;
     for (auto& plan: appData["plans"]) {
         if (!plan.contains(planName)) continue;
@@ -83,7 +79,6 @@ void renderLists(Gtk::Box* listsBox, json& appData, const std::string& planName)
                 Gtk::Box* row;
                 Gtk::Box* sepAbove;
                 Gtk::Entry* edit;
-                Gtk::Label* handle; // Broadway drag handle
             };
             std::vector<EntryInfo> infos;
             int prevID = -1;
@@ -106,13 +101,6 @@ void renderLists(Gtk::Box* listsBox, json& appData, const std::string& planName)
                     entryEdit->add_css_class("indented");
                 entryEdit->set_text(entryData);
                 entryEdit->set_hexpand(true);
-
-                Gtk::Label* dragHandle = nullptr;
-                if (isBroadway) {
-                    dragHandle = Gtk::make_managed<Gtk::Label>("⠿");
-                    dragHandle->add_css_class("dragHandle");
-                    entryRow->append(*dragHandle);
-                }
 
                 entryRow->append(*entryEdit);
                 auto handled = std::make_shared<bool>(false); // fix bug
@@ -221,7 +209,7 @@ void renderLists(Gtk::Box* listsBox, json& appData, const std::string& planName)
                 };
 
                 listSection->append(*entryRow);
-                infos.push_back({ entryID, prevID, entryRow, sep, entryEdit, dragHandle });
+                infos.push_back({ entryID, prevID, entryRow, sep, entryEdit });
                 prevID = entryID;
             };
 
@@ -235,149 +223,7 @@ void renderLists(Gtk::Box* listsBox, json& appData, const std::string& planName)
             for (size_t i = 0; i < infos.size(); ++i) {
                 EntryInfo info = infos[i];
                 Gtk::Box* sepAfter = (i + 1 < infos.size()) ? infos[i + 1].sepAbove : sepEnd;
-
-                if (!isBroadway) { // Broadway doesn't support dragging
-                    auto dragSrc = Gtk::DragSource::create();
-                    dragSrc->set_propagation_phase(Gtk::PropagationPhase::CAPTURE);
-                    dragSrc->set_actions(Gdk::DragAction::MOVE);
-                    auto paintable = Gtk::WidgetPaintable::create(*info.row); // Drag icon
-                    dragSrc->set_icon(paintable, 0, 0);
-                    dragSrc->set_propagation_phase(Gtk::PropagationPhase::CAPTURE);
-                    dragSrc->set_actions(Gdk::DragAction::MOVE);
-                    dragSrc->signal_prepare().connect([planName, listName, info](double, double) -> Glib::RefPtr<Gdk::ContentProvider> {
-                        App::get()->dragPlanName = planName;
-                        App::get()->dragListName = listName;
-                        App::get()->dragEntryID = info.id;
-                        GValue gval = G_VALUE_INIT;
-                        g_value_init(&gval, G_TYPE_INT);
-                        g_value_set_int(&gval, info.id);
-                        auto provider = Glib::wrap(gdk_content_provider_new_for_value(&gval), true);
-                        g_value_unset(&gval);
-                        return provider;
-                    }, false);
-                    dragSrc->signal_drag_end().connect([info, activeIndicator](const Glib::RefPtr<Gdk::Drag>&, bool) {
-                        info.row->set_opacity(1.0);
-                        if (*activeIndicator) { (*activeIndicator)->set_visible(false); *activeIndicator = nullptr; }
-                    });
-                    info.edit->add_controller(dragSrc);
-
-                    // Drop target on row
-                    auto dropTarget = Gtk::DropTarget::create(G_TYPE_INT, Gdk::DragAction::MOVE);
-                    auto onMotion = [info, sepAfter, showIndicator](double, double y) -> Gdk::DragAction {
-                        showIndicator(y < info.row->get_height() / 2.0 ? info.sepAbove : sepAfter);
-                        return Gdk::DragAction::MOVE;
-                    };
-                    dropTarget->signal_enter().connect(onMotion, false);
-                    dropTarget->signal_motion().connect(onMotion, false);
-                    dropTarget->signal_leave().connect([showIndicator]() { showIndicator(nullptr); });
-                    dropTarget->signal_drop().connect([planName, listName, info, sepAfter, showIndicator, &appData](const Glib::ValueBase&, double, double y) -> bool {
-                        showIndicator(nullptr);
-                        info.row->set_opacity(1.0);
-                        int srcID = App::get()->dragEntryID;
-                        if (srcID == info.id) return false;
-                        int insertAfterID = (y < info.row->get_height() / 2.0) ? info.prevID : info.id;
-                        std::string srcPlan = App::get()->dragPlanName;
-                        std::string srcList = App::get()->dragListName;
-                        Glib::signal_idle().connect_once([planName, listName, srcPlan, srcList, srcID, insertAfterID, &appData]() {
-                            moveEntryJSON(appData, srcPlan, srcList, srcID, planName, listName, insertAfterID);
-                            ensureListNotEmpty(appData, srcPlan, srcList);
-                            saveJSON(appData);
-                            App::get()->refreshCurrentPlan(listName);
-                        });
-                        return true;
-                    }, false);
-                    info.row->add_controller(dropTarget);
-                }
             };
-
-            // Broadway drag fix
-            if (isBroadway && !infos.empty()) {
-                auto infosShared = std::make_shared<std::vector<EntryInfo>>(infos);
-                auto pendingInsertAfterID = std::make_shared<int>(-2);
-
-                auto doMove = std::make_shared<std::function<void()>>(
-                    [broadwayDragging, pendingInsertAfterID, showIndicator, infosShared, planName, listName, &appData]() {
-                        if (!*broadwayDragging) return;
-                        *broadwayDragging = false;
-                        showIndicator(nullptr);
-                        for (auto& i : *infosShared) i.row->set_opacity(1.0);
-                        int insertAfterID = *pendingInsertAfterID;
-                        *pendingInsertAfterID = -2;
-                        if (insertAfterID == -2) return;
-                        int srcID = App::get()->dragEntryID;
-                        if (srcID == -1) return;
-                        if (insertAfterID == srcID) return;
-                        std::string srcPlan = App::get()->dragPlanName;
-                        std::string srcList = App::get()->dragListName;
-
-                        if (srcPlan == planName && srcList == listName) {
-                            for (auto& i : *infosShared)
-                                if (i.id == srcID && insertAfterID == i.prevID) return;
-                        }
-                        Glib::signal_idle().connect_once([srcPlan, srcList, srcID, planName, listName, insertAfterID, &appData]() {
-                            moveEntryJSON(appData, srcPlan, srcList, srcID, planName, listName, insertAfterID);
-                            ensureListNotEmpty(appData, srcPlan, srcList);
-                            saveJSON(appData);
-                            App::get()->refreshCurrentPlan(listName);
-                        });
-                    }
-                );
-
-                // Motion tracking
-                auto motionCtrl = Gtk::EventControllerMotion::create();
-                motionCtrl->signal_motion().connect([broadwayDragging, infosShared, sepEnd, showIndicator, pendingInsertAfterID](double, double y) {
-                    if (!*broadwayDragging) return;
-                    *pendingInsertAfterID = (*infosShared).back().id;
-                    Gtk::Box* indicator = sepEnd;
-                    for (size_t j = 0; j < infosShared->size(); ++j) {
-                        auto& other = (*infosShared)[j];
-                        auto alloc = other.row->get_allocation();
-                        float rowMid = (float)alloc.get_y() + (float)alloc.get_height() / 2.0f;
-                        if ((float)y < rowMid) {
-                            *pendingInsertAfterID = other.prevID;
-                            indicator = other.sepAbove;
-                            break;
-                        }
-                        *pendingInsertAfterID = other.id;
-                        indicator = (j + 1 < infosShared->size()) ? (*infosShared)[j + 1].sepAbove : sepEnd;
-                    }
-                    showIndicator(indicator);
-                });
-
-                motionCtrl->signal_leave().connect([broadwayDragging, showIndicator]() {
-                    if (*broadwayDragging) showIndicator(nullptr);
-                });
-                listSection->add_controller(motionCtrl);
-
-                // Release handler
-                auto releaseCtrl = Gtk::EventControllerLegacy::create();
-                releaseCtrl->set_propagation_phase(Gtk::PropagationPhase::BUBBLE);
-                releaseCtrl->signal_event().connect([broadwayDragging, doMove](const Glib::RefPtr<const Gdk::Event>& event) -> bool {
-                    auto type = gdk_event_get_event_type(const_cast<GdkEvent*>(event->gobj()));
-                    if (*broadwayDragging && (type == GDK_BUTTON_RELEASE || type == GDK_TOUCH_END))
-                        (*doMove)();
-                    return false; // just observe
-                }, false);
-                listSection->add_controller(releaseCtrl);
-
-                for (size_t i = 0; i < infos.size(); ++i) {
-                    EntryInfo info = infos[i];
-                    if (!info.handle) continue;
-
-                    auto gesture = Gtk::GestureDrag::create();
-                    gesture->signal_drag_begin().connect([info, planName, listName, broadwayDragging](double, double) {
-                        *broadwayDragging = true;
-                        App::get()->dragPlanName = planName;
-                        App::get()->dragListName = listName;
-                        App::get()->dragEntryID = info.id;
-                        info.row->set_opacity(0.5);
-                    });
-                    gesture->signal_drag_end().connect([doMove](double, double) {
-                        (*doMove)();
-                    });
-                    info.handle->add_controller(gesture);
-                }
-            }
 
             // List header drag to reorder
             {

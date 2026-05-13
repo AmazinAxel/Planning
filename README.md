@@ -43,31 +43,6 @@ Make sure you have Samba running and add these options to `~/.config/planning/da
 "smbshare": "USB",
 ```
 
-<!--
-## Broadway web test
-
-I've set up a demo server running Broadway so you could run this app in your browser. Anyone can edit or delete data in the Broadway session, so please use your own application instead of relying on the hosted app. Access through Broadway is by no means a replacement for the native program and is not recommended on supported devices.
-
-Access it here: <https://planning.amazinaxel.com>
--->
-
-## Run Broadway
-
-Broadway allows you to run Planning in your web browser.
-
-Although this kind of defeats the entire purpose of this app being written in native GTK, you can run a Broadway server yourself so you can access the web version of Planning. It can also sync with a NAS share so this can be a good option if you want to keep all your unsupported devices (e.g. Apple) synced.
-
-I don't suggest this option if you're running Linux/MacOS, Windows, Android or any other OS which natively supports GTK. Instead, I provide Android and Linux prebuilt binaries which are available in the Releases tab on this repo. They're less buggy, faster, and platform native.
-
-Open the project dev shell and run
-
-```bash
-gtk4-broadwayd :5
-GDK_BACKEND=broadway BROADWAY_DISPLAY=:5 gtk4-demo
-```
-
-By default the site will be visible at <http://127.0.0.1:8085>.
-
 ## Tips
 
 Use your arrow keys. Press `ctrl + D` to delete a plan. Press `ctrl + N` (hotkey) to open the popup to create a new plan or list. This app is best used with the GTK4 Nord dark theme.
@@ -152,12 +127,6 @@ perl /usr/opt/gtk-android-builder/pixiewood build
 If on NixOS, add `programs.nix-ld.enable = true;` to your config.
 
 Note that the app dynamically adjusts its theme based on the Android dark mode setting. If you want dark mode, enable it in your Android settings!
-
-<!--
-## Deploy to a raspberry pi
-
-My [homelab repository](https://github.com/amazinaxel/homelab) has a service which runs this app through Broadway. It allows anyone on the network to use this app (on non-native devices as well) through the use of a web browser. Use `sudo nix build .#planning --system aarch64-linux` and then `scp result/bin/planning alec@alechomelab.local:/home/alec/` to deploy it.
--->
 
 ### Android emulation
 

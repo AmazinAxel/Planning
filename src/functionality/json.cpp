@@ -33,6 +33,4 @@ void saveJSON(const json& data) {
     toWrite["lastSaved"] = static_cast<long long>(time(nullptr));
     auto path = Glib::get_user_config_dir() + "/planning/data.json";
     Glib::file_set_contents(path, toWrite.dump(4));
-    if (isOnBroadway())
-        uploadDataToServer();
 };
